@@ -16,6 +16,7 @@ import {
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 import { Response } from 'express';
+import { JwtToken } from './dto/jwt-token.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -33,7 +34,7 @@ export class AuthController {
   @UseGuards(KakaoAuthGuard)
   @Post('login/kakao/callback')
   async login(@Req() req, @Res() res: Response) {
-    const token: any = this.authService.validateUser(req.user);
+    const token: JwtToken = this.authService.validateUser(req.user);
     res.cookie('access_token', token.access_token, { httpOnly: true });
     res.cookie('refresh_token', token.refresh_token, { httpOnly: true });
     res.end();
