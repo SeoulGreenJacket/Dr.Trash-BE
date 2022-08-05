@@ -9,7 +9,7 @@ import { User } from 'src/users/entities/user.entity';
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    //private authRepository: AuthRepository,
+    private authRepository: AuthRepository,
     private usersService: UsersService,
   ) {}
 
@@ -19,7 +19,7 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
     const refresh_token = this.jwtService.sign(payload, { expiresIn });
-    //this.authRepository.save(uuid, refresh_token, expiresIn);
+    this.authRepository.save(uuid, refresh_token, expiresIn);
     return {
       access_token,
       refresh_token,
@@ -33,7 +33,8 @@ export class AuthService {
     if (existedUser) {
       return this.login(existedUser);
     } else {
-      return this.usersService.create(payload);
+      const user = this.usersService.create(payload);
+      return this.login(user);
     }
   }
 }

@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -31,10 +32,10 @@ export class AuthController {
 
   @UseGuards(KakaoAuthGuard)
   @Post('login/kakao/callback')
-  async login(@Req() req, @Res() res) {
+  async login(@Req() req, @Res() res: Response) {
     const token: any = this.authService.validateUser(req.user);
-    res.cookie('access_token', token.access_token);
-    res.cookie('refresh_token', token.refresh_token);
+    res.cookie('access_token', token.access_token, { httpOnly: true });
+    res.cookie('refresh_token', token.refresh_token, { httpOnly: true });
     res.end();
     return;
   }
