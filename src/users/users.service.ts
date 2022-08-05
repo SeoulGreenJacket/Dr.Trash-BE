@@ -11,5 +11,6 @@ export class UsersService {
     const uuid = uuid4();
     const user: User = { ...userPayload, id: uuid };
     this.users.push(user);
+    return user;
   }
 }
