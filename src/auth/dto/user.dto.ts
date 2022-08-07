@@ -3,7 +3,3 @@ export class UserKakaoDto {
   thumnail: string;
   email: string;
 }
-// export class UserNaverDto {
-//   name: string;
-//   email: string;
-// }
