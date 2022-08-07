@@ -1,4 +1,4 @@
-import { UsersService } from './../users/users.service';
+import { UsersService } from 'src/users/users.service';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
@@ -19,7 +19,7 @@ export class AuthService {
     const access_token = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
     const refresh_token = this.jwtService.sign(payload, { expiresIn });
-    this.authRepository.save(uuid, refresh_token, expiresIn);
+    //this.authRepository.save(uuid, refresh_token, expiresIn);
     return {
       access_token,
       refresh_token,
