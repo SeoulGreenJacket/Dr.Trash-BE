@@ -15,9 +15,9 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
-import { Response } from 'express';
 import { JwtToken } from './dto/jwt-token.dto';
-
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -32,12 +32,8 @@ export class AuthController {
   }
 
   @UseGuards(KakaoAuthGuard)
-  @Post('login/kakao/callback')
-  async login(@Req() req, @Res() res: Response) {
-    const token: JwtToken = this.authService.validateUser(req.user);
-    res.cookie('access_token', token.access_token, { httpOnly: true });
-    res.cookie('refresh_token', token.refresh_token, { httpOnly: true });
-    res.end();
-    return;
+  @Get('login/kakao/callback')
+  async login(@Req() req): Promise<JwtToken> {
+    return this.authService.validateUser(req.user);
   }
 }
