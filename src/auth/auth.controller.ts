@@ -1,18 +1,5 @@
-import { User } from './../users/entities/user.entity';
 import { UsersService } from './../users/users.service';
-import { UserKakaoDto } from './dto/user.dto';
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  Req,
-  UseGuards,
-  Res,
-} from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 import { JwtToken } from './dto/jwt-token.dto';
@@ -27,13 +14,13 @@ export class AuthController {
 
   @UseGuards(KakaoAuthGuard)
   @Get('login/kakao')
-  async kakaopage(@Req() req) {
-    return;
+  async loginWithKakao(@Req() req): Promise<JwtToken> {
+    return this.authService.validateUser(req.user);
   }
 
-  @UseGuards(KakaoAuthGuard)
-  @Get('login/kakao/callback')
-  async login(@Req() req): Promise<JwtToken> {
-    return this.authService.validateUser(req.user);
+  @Get('logout')
+  async logout() {
+    //토큰 삭제 로직이 추가 될 예정입니다
+    return;
   }
 }
