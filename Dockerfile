@@ -8,5 +8,4 @@ RUN npm i
 
 COPY . ./
 
-ENTRYPOINT ["npm"]
-CMD ["run", "start:dev"]
+ENTRYPOINT ["entrypoint.sh"]
