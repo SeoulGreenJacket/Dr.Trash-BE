@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.development.env',
     }),
   ],
 })
