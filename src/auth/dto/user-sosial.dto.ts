@@ -1,4 +1,4 @@
-export class UserKakaoDto {
+export class UserSosialDto {
   provider: string;
   id: string;
   name: string;
