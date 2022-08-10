@@ -2,7 +2,7 @@
 name: Bug report
 about: 버그리포트를 작성해주세요.
 title: 'bug: '
-labels: "bug"
+labels: "\U0001F41B fix"
 assignees: ''
 
 ---
@@ -24,17 +24,6 @@ assignees: ''
 
 ### **스크린샷**
 스크린샷이 있다면 도움이 됩니다.
-
-### **Desktop:**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
-
-### **Smartphone:**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
 
 ### **추가적인 상황**
 문제를 해결하는데 도움되는 당시의 상황을 적어주세요.
