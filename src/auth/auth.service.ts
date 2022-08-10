@@ -6,7 +6,7 @@ import { v4 as uuid4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import { User } from 'src/users/entities/user.entity';
-import { UserSosialDto } from './dto/user-sosial.dto';
+import { UserSocialDto } from './dto/user-social.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +30,7 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: UserSosialDto) {
+  async validateUser(payload: UserSocialDto) {
     const { id, provider, thumnail, name } = payload;
     const existedUser: User = await this.databaseService.userFindByOauth(
       id,
