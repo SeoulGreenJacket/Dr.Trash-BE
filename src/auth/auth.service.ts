@@ -1,4 +1,4 @@
-import { UserPayload, OauthPayload } from './../users/dto/create-user.dto';
+import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
 import { DatabaseService } from './../database/database.service';
 import { UsersService } from 'src/users/users.service';
 import { Injectable } from '@nestjs/common';
@@ -17,7 +17,7 @@ export class AuthService {
     private databaseService: DatabaseService,
   ) {}
 
-  async login(user: User) {
+  login(user: User) {
     const uuid = uuid4();
     const payload = { uuid, sub: user.id };
     const access_token = this.jwtService.sign(payload);
@@ -40,8 +40,8 @@ export class AuthService {
       return this.login(existedUser);
     } else {
       const userPayload: UserPayload = { name, thumnail };
-      const oauthPayload: OauthPayload = { id, provider };
-      const user = await this.usersService.create(userPayload, oauthPayload);
+      const oAuthPayload: OAuthPayload = { id, provider };
+      const user = await this.usersService.create(userPayload, oAuthPayload);
       return this.login(user);
     }
   }

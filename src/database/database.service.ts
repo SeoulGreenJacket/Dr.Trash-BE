@@ -1,4 +1,4 @@
-import { CreateOauthDto, CreateUserDto } from './../users/dto/create-user.dto';
+import { CreateOAuthDto, CreateUserDto } from './../users/dto/create-user.dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { NEST_PGPROMISE_CONNECTION } from 'nest-pgpromise';
 
@@ -17,7 +17,7 @@ export class DatabaseService {
     );
   }
 
-  oauthCreate(oauth: CreateOauthDto) {
+  oauthCreate(oauth: CreateOAuthDto) {
     const { id, provider, user_id } = oauth;
     return this.pg.query(
       `INSERT INTO oauth(user_id, provider, id) VALUES (${user_id}, ${id}, ${provider});`,

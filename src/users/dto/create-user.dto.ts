@@ -4,7 +4,7 @@ export class CreateUserDto {
   thumnail: string;
 }
 
-export class CreateOauthDto {
+export class CreateOAuthDto {
   user_id: string;
   provider: string;
   id: string;
@@ -15,7 +15,7 @@ export class UserPayload {
   thumnail: string;
 }
 
-export class OauthPayload {
+export class OAuthPayload {
   provider: string;
   id: string;
 }
