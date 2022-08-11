@@ -1,8 +1,8 @@
 ---
 name: Feature request
 about: 기능 구현 예정을 작성해주세요.
-title: 'Feat: '
-labels: "🔥 Feat"
+title: 'feature: '
+labels: "✨ enhancement"
 assignees: ''
 
 ---
