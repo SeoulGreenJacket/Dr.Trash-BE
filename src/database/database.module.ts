@@ -5,12 +5,14 @@ import { NestPgpromiseModule, NestPgpromiseOptions } from 'nest-pgpromise';
 @Module({
   imports: [
     NestPgpromiseModule.register({
-      user: process.env.USER,
-      password: process.env.PASSWORD,
-      host: process.env.HOST,
-      database: process.env.DATABASE,
-      port: 5000,
-    } as NestPgpromiseOptions),
+      connection: {
+        user: process.env.USER,
+        password: process.env.PASSWORD,
+        host: process.env.HOST,
+        database: process.env.DATABASE,
+        port: parseInt(process.env.DATABASE_PORT, 10),
+      },
+    }),
   ],
   providers: [DatabaseService],
   exports: [DatabaseService],
