@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { DatabaseService } from './database.service';
-import { NestPgpromiseModule, NestPgpromiseOptions } from 'nest-pgpromise';
+import { NestPgpromiseModule } from 'nest-pgpromise';
 
 @Module({
   imports: [
