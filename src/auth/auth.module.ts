@@ -6,7 +6,8 @@ import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/users/users.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy, RefreshJwtStrategy } from './strategy/jwt.strategy';
+import { JwtStrategy } from './strategy/jwt.strategy';
+import { RefreshJwtStrategy } from './strategy/refresh-jwt.strategy';
 import { AuthRepository } from './auth.repository';
 
 @Module({
