@@ -26,7 +26,7 @@ export class DatabaseService {
 
   userFindByOauth(id: string, provider: string) {
     return this.pg.query(
-      `SELECT * FROM users WHERE id=(SELECT user_id FROM oauth WHERE id=${id} AND provider=${provider};);`,
+      `SELECT * FROM users WHERE id=(SELECT user_id FROM oauth WHERE id=${id} AND provider=${provider});`,
     );
   }
 
