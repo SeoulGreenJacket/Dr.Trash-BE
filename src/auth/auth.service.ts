@@ -1,3 +1,4 @@
+import { JwtPayload } from './dto/jwt-payload.dto';
 import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
 import { DatabaseService } from './../database/database.service';
 import { UsersService } from './../users/users.service';
@@ -7,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import { User } from './../users/entities/user.entity';
 import { UserSocialDto } from './dto/user-social.dto';
+import { JwtToken } from './dto/jwt-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,9 +19,9 @@ export class AuthService {
     private databaseService: DatabaseService,
   ) {}
 
-  login(user: User) {
+  async login(user: User): Promise<JwtToken> {
     const uuid = uuid4();
-    const payload = { uuid, sub: user.id };
+    const payload: JwtPayload = { uuid, sub: user.id };
     const access_token = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
     const refresh_token = this.jwtService.sign(payload, { expiresIn });
@@ -30,19 +32,19 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: UserSocialDto) {
-    const { id, provider, image_uri, name } = payload;
+  async validateUser(payload: UserSocialDto): Promise<JwtToken> {
+    const { oauth_id, provider, image_uri, name } = payload;
     const existedUser: User = await this.databaseService.userFindByOAuth(
-      id,
+      oauth_id,
       provider,
     );
     if (existedUser) {
-      return this.login(existedUser);
+      return await this.login(existedUser);
     } else {
       const userPayload: UserPayload = { name, image_uri };
-      const oAuthPayload: OAuthPayload = { id, provider };
+      const oAuthPayload: OAuthPayload = { oauth_id, provider };
       const user = await this.usersService.create(userPayload, oAuthPayload);
-      return this.login(user);
+      return await this.login(user);
     }
   }
 
