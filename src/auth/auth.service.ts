@@ -1,5 +1,9 @@
 import { JwtPayload } from './dto/jwt-payload.dto';
-import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
+import {
+  UserPayload,
+  OAuthPayload,
+  UserId,
+} from './../users/dto/create-user.dto';
 import { DatabaseService } from './../database/database.service';
 import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
@@ -34,16 +38,22 @@ export class AuthService {
 
   async validateUser(payload: UserSocialDto): Promise<JwtToken> {
     const { oauth_id, provider, image_uri, name } = payload;
-    const existedUser: User = await this.databaseService.userFindByOAuth(
+    const existedUser: UserId = await this.databaseService.userCheckByOAuth(
       oauth_id,
       provider,
     );
     if (existedUser) {
-      return await this.login(existedUser);
+      const user: User = await this.databaseService.userFindByUser_id(
+        existedUser.user_id,
+      );
+      return await this.login(user);
     } else {
       const userPayload: UserPayload = { name, image_uri };
       const oAuthPayload: OAuthPayload = { oauth_id, provider };
-      const user = await this.usersService.create(userPayload, oAuthPayload);
+      const user: User = await this.usersService.create(
+        userPayload,
+        oAuthPayload,
+      );
       return await this.login(user);
     }
   }
