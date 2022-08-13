@@ -49,20 +49,14 @@ module.exports = {
       {
         vars: 'all',
         args: 'after-used',
-        ignoreRestSiblings: false,
+        ignoreRestSiblings: true,
       },
     ],
     'no-use-before-define': 'error',
     'valid-typeof': 'error',
 
     'arrow-body-style': ['error', 'always'],
-    'camelcase': [
-      'error',
-      {
-        properties: 'never',
-        ignoreDestructuring: true,
-      },
-    ],
+    'camelcase': 'error',
     'class-methods-use-this': 'warn',
     'curly': 'warn',
     'default-case': 'warn',
