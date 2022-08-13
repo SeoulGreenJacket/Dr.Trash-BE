@@ -5,9 +5,9 @@ export class CreateUserDto {
 }
 
 export class CreateOAuthDto {
-  user_id: string;
+  user_id: number;
   provider: string;
-  id: string;
+  oauth_id: string;
 }
 
 export class UserPayload {
@@ -17,5 +17,10 @@ export class UserPayload {
 
 export class OAuthPayload {
   provider: string;
-  id: string;
+  oauth_id: string;
 }
+
+// db test용
+// export class id {
+//   user_id: number;
+// }
