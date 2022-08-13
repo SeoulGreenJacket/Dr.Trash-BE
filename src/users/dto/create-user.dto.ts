@@ -1,7 +1,7 @@
 export class CreateUserDto {
   point: number;
   name: string;
-  thumnail: string;
+  image_uri: string;
 }
 
 export class CreateOAuthDto {
@@ -12,7 +12,7 @@ export class CreateOAuthDto {
 
 export class UserPayload {
   name: string;
-  thumnail: string;
+  image_uri: string;
 }
 
 export class OAuthPayload {

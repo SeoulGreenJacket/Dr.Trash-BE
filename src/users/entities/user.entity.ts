@@ -1,6 +1,6 @@
 export class User {
   id: string;
   name: string;
-  thumnail: string;
+  image_uri: string;
   point: number;
 }

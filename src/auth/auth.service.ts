@@ -1,11 +1,11 @@
 import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
 import { DatabaseService } from './../database/database.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
-import { User } from 'src/users/entities/user.entity';
+import { User } from './../users/entities/user.entity';
 import { UserSocialDto } from './dto/user-social.dto';
 
 @Injectable()
@@ -31,15 +31,15 @@ export class AuthService {
   }
 
   async validateUser(payload: UserSocialDto) {
-    const { id, provider, thumnail, name } = payload;
-    const existedUser: User = await this.databaseService.userFindByOauth(
+    const { id, provider, image_uri, name } = payload;
+    const existedUser: User = await this.databaseService.userFindByOAuth(
       id,
       provider,
     );
     if (existedUser) {
       return this.login(existedUser);
     } else {
-      const userPayload: UserPayload = { name, thumnail };
+      const userPayload: UserPayload = { name, image_uri };
       const oAuthPayload: OAuthPayload = { id, provider };
       const user = await this.usersService.create(userPayload, oAuthPayload);
       return this.login(user);

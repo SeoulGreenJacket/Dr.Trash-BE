@@ -10,27 +10,27 @@ export class DatabaseService {
     return await this.pg.query(sql);
   }
 
-  userCreate(user: CreateUserDto) {
-    const { name, thumnail, point } = user;
-    return this.pg.query(
-      `INSERT INTO users(name, thumnail, point) VALUES (${name}, ${thumnail}, ${point}) RETURNING id;`,
+  async userCreate(user: CreateUserDto) {
+    const { name, image_uri, point } = user;
+    return await this.pg.query(
+      `INSERT INTO application.user_table (name,image_uri,point) VALUES ('${name}', '${image_uri}', ${point}) RETURNING id;`,
     );
   }
 
-  oauthCreate(oauth: CreateOAuthDto) {
+  async oauthCreate(oauth: CreateOAuthDto) {
     const { id, provider, user_id } = oauth;
-    return this.pg.query(
+    return await this.pg.query(
       `INSERT INTO oauth(user_id, provider, id) VALUES (${user_id}, ${id}, ${provider});`,
     );
   }
 
-  userFindByOAuth(id: string, provider: string) {
-    return this.pg.query(
-      `SELECT * FROM users WHERE id=(SELECT user_id FROM oauth WHERE id=${id} AND provider=${provider});`,
+  async userFindByOAuth(id: string, provider: string) {
+    return await this.pg.query(
+      `SELECT * FROM user WHERE id=(SELECT user_id FROM oauth WHERE id=${id} AND provider=${provider});`,
     );
   }
 
-  userFindByUser_id(user_id: string) {
-    return this.pg.query(`SELECT * FROM users WHERE id=${user_id};`);
+  async userFindByUser_id(user_id: string) {
+    return await this.pg.query(`SELECT * FROM user WHERE id=${user_id};`);
   }
 }
