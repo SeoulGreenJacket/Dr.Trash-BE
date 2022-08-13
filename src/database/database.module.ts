@@ -1,17 +1,22 @@
 import { Module } from '@nestjs/common';
 import { DatabaseService } from './database.service';
 import { NestPgpromiseModule } from 'nest-pgpromise';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    NestPgpromiseModule.register({
-      connection: {
-        user: process.env.USER,
-        password: process.env.PASSWORD,
-        host: process.env.HOST,
-        database: process.env.DATABASE,
-        port: parseInt(process.env.DATABASE_PORT, 10),
-      },
+    NestPgpromiseModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          user: configService.get<string>('DATABASE_USER'),
+          password: configService.get<string>('DATABASE_PASSWORD'),
+          host: configService.get<string>('DATABASE_HOST'),
+          database: configService.get<string>('DATABASE_NAME'),
+          port: parseInt(configService.get<string>('DATABASE_PORT'), 10),
+        },
+      }),
+      inject: [ConfigService],
     }),
   ],
   providers: [DatabaseService],
