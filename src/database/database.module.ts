@@ -1,25 +1,31 @@
-import { Module } from '@nestjs/common';
+import { Module, OnApplicationShutdown } from '@nestjs/common';
+import { ModuleRef } from '@nestjs/core';
+import { Pool } from 'pg';
 import { DatabaseService } from './database.service';
-import { NestPgpromiseModule } from 'nest-pgpromise';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [
-    NestPgpromiseModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        connection: {
-          user: configService.get<string>('DATABASE_USER'),
-          password: configService.get<string>('DATABASE_PASSWORD'),
-          host: configService.get<string>('DATABASE_HOST'),
-          database: configService.get<string>('DATABASE_NAME'),
-          port: parseInt(configService.get<string>('DATABASE_PORT'), 10),
-        },
-      }),
-      inject: [ConfigService],
-    }),
+  providers: [
+    DatabaseService,
+    {
+      provide: 'DATABASE_POOL',
+      useFactory: () => {
+        const {
+          DATABASE_USERNAME: user,
+          DATABASE_HOST: host,
+          DATABASE_DBNAME: database,
+          DATABASE_PASSWORD: password,
+          DATABASE_PORT: port,
+        } = process.env;
+        return new Pool({ user, host, database, password, port: +port });
+      },
+    },
   ],
-  providers: [DatabaseService],
   exports: [DatabaseService],
 })
-export class DatabaseModule {}
+export class DatabaseModule implements OnApplicationShutdown {
+  constructor(private readonly moduleRef: ModuleRef) {}
+
+  onApplicationShutdown() {
+    this.moduleRef.get<Pool>('DATABASE_POOL').end();
+  }
+}
