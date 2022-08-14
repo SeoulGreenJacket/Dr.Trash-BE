@@ -1,12 +1,18 @@
-import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
+import { JwtPayload } from './dto/jwt-payload.dto';
+import {
+  UserPayload,
+  OAuthPayload,
+  UserId,
+} from './../users/dto/create-user.dto';
 import { DatabaseService } from './../database/database.service';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
-import { User } from 'src/users/entities/user.entity';
+import { User } from './../users/entities/user.entity';
 import { UserSocialDto } from './dto/user-social.dto';
+import { JwtToken } from './dto/jwt-token.dto';
 
 @Injectable()
 export class AuthService {
@@ -17,9 +23,9 @@ export class AuthService {
     private databaseService: DatabaseService,
   ) {}
 
-  login(user: User) {
+  async login(user: User): Promise<JwtToken> {
     const uuid = uuid4();
-    const payload = { uuid, sub: user.id };
+    const payload: JwtPayload = { uuid, sub: user.id };
     const access_token = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
     const refresh_token = this.jwtService.sign(payload, { expiresIn });
@@ -30,19 +36,25 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: UserSocialDto) {
-    const { id, provider, thumnail, name } = payload;
-    const existedUser: User = await this.databaseService.userFindByOauth(
-      id,
+  async validateUser(payload: UserSocialDto): Promise<JwtToken> {
+    const { oauth_id, provider, image_uri, name } = payload;
+    const existedUser: UserId = await this.databaseService.userCheckByOAuth(
+      oauth_id,
       provider,
     );
     if (existedUser) {
-      return this.login(existedUser);
+      const user: User = await this.databaseService.userFindByUser_id(
+        existedUser.user_id,
+      );
+      return await this.login(user);
     } else {
-      const userPayload: UserPayload = { name, thumnail };
-      const oAuthPayload: OAuthPayload = { id, provider };
-      const user = await this.usersService.create(userPayload, oAuthPayload);
-      return this.login(user);
+      const userPayload: UserPayload = { name, image_uri };
+      const oAuthPayload: OAuthPayload = { oauth_id, provider };
+      const user: User = await this.usersService.create(
+        userPayload,
+        oAuthPayload,
+      );
+      return await this.login(user);
     }
   }
 

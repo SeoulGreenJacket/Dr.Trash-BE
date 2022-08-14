@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from './../database/database.service';
 import {
   CreateUserDto,
   CreateOAuthDto,
@@ -18,6 +18,6 @@ export class UsersService {
     const oauth: CreateOAuthDto = { ...oAuthPayload, user_id };
     await this.databaseService.oauthCreate(oauth);
 
-    return this.databaseService.userFindByUser_id(user_id);
+    return await this.databaseService.userFindByUser_id(user_id);
   }
 }

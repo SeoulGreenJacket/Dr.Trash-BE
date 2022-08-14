@@ -1,21 +1,30 @@
 export class CreateUserDto {
   point: number;
   name: string;
-  thumnail: string;
+  image_uri: string;
 }
 
 export class CreateOAuthDto {
-  user_id: string;
+  user_id: number;
   provider: string;
-  id: string;
+  oauth_id: string;
 }
 
 export class UserPayload {
   name: string;
-  thumnail: string;
+  image_uri: string;
 }
 
 export class OAuthPayload {
   provider: string;
-  id: string;
+  oauth_id: string;
 }
+
+export class UserId {
+  user_id: number;
+}
+
+// db test용
+// export class id {
+//   user_id: number;
+// }
