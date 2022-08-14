@@ -1,36 +1,12 @@
-import { CreateOAuthDto, CreateUserDto } from './../users/dto/create-user.dto';
 import { Inject, Injectable } from '@nestjs/common';
-import { NEST_PGPROMISE_CONNECTION } from 'nest-pgpromise';
+import { Pool } from 'pg';
 
 @Injectable()
 export class DatabaseService {
-  constructor(@Inject(NEST_PGPROMISE_CONNECTION) private readonly pg) {}
+  constructor(@Inject('DATABASE_POOL') private pool: Pool) {}
 
-  async query(sql: string) {
-    return await this.pg.query(sql);
-  }
-
-  userCreate(user: CreateUserDto) {
-    const { name, thumnail, point } = user;
-    return this.pg.query(
-      `INSERT INTO users(name, thumnail, point) VALUES (${name}, ${thumnail}, ${point}) RETURNING id;`,
-    );
-  }
-
-  oauthCreate(oauth: CreateOAuthDto) {
-    const { id, provider, user_id } = oauth;
-    return this.pg.query(
-      `INSERT INTO oauth(user_id, provider, id) VALUES (${user_id}, ${id}, ${provider});`,
-    );
-  }
-
-  userFindByOauth(id: string, provider: string) {
-    return this.pg.query(
-      `SELECT * FROM users WHERE id=(SELECT user_id FROM oauth WHERE id=${id} AND provider=${provider};);`,
-    );
-  }
-
-  userFindByUser_id(user_id: string) {
-    return this.pg.query(`SELECT * FROM users WHERE id=${user_id};`);
+  async query<DataType>(query: string, values?: any[]): Promise<DataType[]> {
+    const result = await this.pool.query<DataType>(query, values);
+    return result.rows;
   }
 }
