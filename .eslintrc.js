@@ -44,14 +44,6 @@ module.exports = {
       { disallowArithmeticOperators: true },
     ],
     'no-unused-private-class-members': 'warn',
-    'no-unused-vars': [
-      'error',
-      {
-        vars: 'all',
-        args: 'after-used',
-        ignoreRestSiblings: true,
-      },
-    ],
     'no-use-before-define': 'error',
     'valid-typeof': 'error',
 
