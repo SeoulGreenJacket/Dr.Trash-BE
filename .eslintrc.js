@@ -44,14 +44,6 @@ module.exports = {
       { disallowArithmeticOperators: true },
     ],
     'no-unused-private-class-members': 'warn',
-    'no-unused-vars': [
-      'error',
-      {
-        vars: 'all',
-        args: 'after-used',
-        ignoreRestSiblings: true,
-      },
-    ],
     'no-use-before-define': 'error',
     'valid-typeof': 'error',
 
@@ -84,14 +76,12 @@ module.exports = {
     'no-unneeded-ternary': 'warn',
     'no-var': 'error',
     'prefer-const': 'warn',
-    'sort-imports': 'warn',
     'spaced-comment': 'warn',
 
     'eol-last': 'error',
     'key-spacing': 'warn',
     'no-mixed-spaces-and-tabs': 'error',
     'no-multi-spaces': 'warn',
-    'no-multi-empty-lines': 'warn',
     'no-tabs': 'warn',
     'no-trailing-spaces': 'error',
     'no-whitespace-before-property': 'error',
