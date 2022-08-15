@@ -2,7 +2,6 @@ import { AuthService } from './../auth.service';
 import { BadRequestException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
-import { UserKakaoDto } from '../dto/user.dto';
 
 export class KakaoStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
@@ -20,7 +19,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
   ) {
     const profileAccount = profile._json.kakao_account;
 
-    const userPayload: UserKakaoDto = {
+    const userPayload = {
       name: profileAccount.profile.nickname,
       thumnail: profileAccount.profile.thumbnail_image_url,
       email:

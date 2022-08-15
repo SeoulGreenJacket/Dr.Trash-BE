@@ -1,10 +1,6 @@
+import { UsersRepository } from './../users/users.repository';
 import { JwtPayload } from './dto/jwt-payload.dto';
-import {
-  UserPayload,
-  OAuthPayload,
-  UserId,
-} from './../users/dto/create-user.dto';
-import { DatabaseService } from './../database/database.service';
+import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
 import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid4 } from 'uuid';
@@ -20,7 +16,7 @@ export class AuthService {
     private jwtService: JwtService,
     private authRepository: AuthRepository,
     private usersService: UsersService,
-    private databaseService: DatabaseService,
+    private usersRepository: UsersRepository,
   ) {}
 
   async login(user: User): Promise<JwtToken> {
@@ -38,19 +34,17 @@ export class AuthService {
 
   async validateUser(payload: UserSocialDto): Promise<JwtToken> {
     const { oauth_id, provider, image_uri, name } = payload;
-    const existedUser: UserId = await this.databaseService.userCheckByOAuth(
+    const existedUser: number = await this.usersRepository.checkByOAuth(
       oauth_id,
       provider,
     );
     if (existedUser) {
-      const user: User = await this.databaseService.userFindByUser_id(
-        existedUser.user_id,
-      );
+      const user: any = await this.usersRepository.findByUserId(existedUser);
       return await this.login(user);
     } else {
       const userPayload: UserPayload = { name, image_uri };
       const oAuthPayload: OAuthPayload = { oauth_id, provider };
-      const user: User = await this.usersService.create(
+      const user: any = await this.usersService.create(
         userPayload,
         oAuthPayload,
       );

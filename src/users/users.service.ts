@@ -1,5 +1,5 @@
+import { UsersRepository } from './users.repository';
 import { Injectable } from '@nestjs/common';
-import { DatabaseService } from './../database/database.service';
 import {
   CreateUserDto,
   CreateOAuthDto,
@@ -9,15 +9,15 @@ import {
 
 @Injectable()
 export class UsersService {
-  constructor(private databaseService: DatabaseService) {}
+  constructor(private usersRepository: UsersRepository) {}
 
   async create(userPayload: UserPayload, oAuthPayload: OAuthPayload) {
     const point = 0;
     const user: CreateUserDto = { ...userPayload, point };
-    const user_id = await this.databaseService.userCreate(user);
+    const user_id = await this.usersRepository.create(user);
     const oauth: CreateOAuthDto = { ...oAuthPayload, user_id };
-    await this.databaseService.oauthCreate(oauth);
+    await this.usersRepository.createOAuth(oauth);
 
-    return await this.databaseService.userFindByUser_id(user_id);
+    return await this.usersRepository.findByUserId(user_id);
   }
 }
