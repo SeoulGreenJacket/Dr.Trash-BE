@@ -10,9 +10,9 @@ import { DatabaseService } from './database.service';
       provide: 'DATABASE_POOL',
       useFactory: () => {
         const {
-          DATABASE_USERNAME: user,
+          DATABASE_USER: user,
           DATABASE_HOST: host,
-          DATABASE_DBNAME: database,
+          DATABASE_NAME: database,
           DATABASE_PASSWORD: password,
           DATABASE_PORT: port,
         } = process.env;

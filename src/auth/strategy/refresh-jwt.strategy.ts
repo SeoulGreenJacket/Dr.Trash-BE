@@ -17,15 +17,15 @@ export class RefreshJwtStrategy extends PassportStrategy(
     });
   }
 
-  async validate(payload: JwtPayload) {
-    let user: any = await this.databaseService.userFindByUser_id(payload.sub);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
-    user = {
-      ...user,
-      uuid: payload.uuid,
-    };
-    return user;
-  }
+  // async validate(payload: JwtPayload) {
+  //   let user: any = await this.databaseService.userFindByUser_id(payload.sub);
+  //   if (!user) {
+  //     throw new UnauthorizedException();
+  //   }
+  //   user = {
+  //     ...user,
+  //     uuid: payload.uuid,
+  //   };
+  //   return user;
+  // }
 }

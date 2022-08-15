@@ -6,29 +6,30 @@ import {
   CreateUserDto,
   OAuthPayload,
 } from './dto/create-user.dto';
+import { UsersRepository } from './users.repository';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
-  // db test용
-  // constructor(private databaseService: DatabaseService) {}
+  //db 테스트용
+  // constructor(private userRepository: UsersRepository) {}
   // @Post('createUser')
   // async create(@Body() user: CreateUserDto) {
-  //   return await this.databaseService.userCreate(user);
+  //   return await this.userRepository.create(user);
   // }
   // @Post('createOAuth')
   // async oauthCreate(@Body() oauth: CreateOAuthDto) {
-  //   return await this.databaseService.oauthCreate(oauth);
+  //   return await this.userRepository.createOAuth(oauth);
   // }
   // @Post('findOAuth')
   // async findOAuth(@Body() oauth: OAuthPayload) {
-  //   return await this.databaseService.userFindByOAuth(
+  //   return await this.userRepository.checkByOAuth(
   //     oauth.oauth_id,
   //     oauth.provider,
   //   );
   // }
   // @Post('findUser')
   // async findUser(@Body() id: id) {
-  //   return await this.databaseService.userFindByUser_id(id.user_id);
+  //   return await this.userRepository.findByUserId(id.user_id);
   // }
 }
