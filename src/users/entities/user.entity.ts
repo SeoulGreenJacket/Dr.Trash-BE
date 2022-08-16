@@ -1,11 +1,6 @@
 export class User {
-  id: string;
+  id: number;
   name: string;
-  thumnail: string;
-  email: string;
-  //   point: number;
-  //   //grade: enum;
-  //   rank: number;
-  //   achievements: [];
-  //   //trashcan: []<>;
+  image_uri: string;
+  point: number;
 }

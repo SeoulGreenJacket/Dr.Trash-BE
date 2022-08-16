@@ -1,16 +1,23 @@
+import { UsersRepository } from './users.repository';
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
-import { v4 as uuid4 } from 'uuid';
+import {
+  CreateUserDto,
+  CreateOAuthDto,
+  UserPayload,
+  OAuthPayload,
+} from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
-  users = [];
+  constructor(private usersRepository: UsersRepository) {}
 
-  create(userPayload: CreateUserDto) {
-    const uuid = uuid4();
-    const user: User = { ...userPayload, id: uuid };
-    this.users.push(user);
-    return user;
+  async create(userPayload: UserPayload, oAuthPayload: OAuthPayload) {
+    const point = 0;
+    const user: CreateUserDto = { ...userPayload, point };
+    const user_id = await this.usersRepository.create(user);
+    const oauth: CreateOAuthDto = { ...oAuthPayload, user_id };
+    await this.usersRepository.createOAuth(oauth);
+
+    return await this.usersRepository.findByUserId(user_id);
   }
 }
