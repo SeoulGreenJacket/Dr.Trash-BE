@@ -12,7 +12,7 @@ export class AuthController {
   @UseGuards(KakaoAuthGuard)
   @Get('login/kakao')
   async loginWithKakao(@Req() req): Promise<JwtToken> {
-    return await this.authService.validateUser(req.user);
+    return await this.authService.login(req.user);
   }
 
   @UseGuards(RefreshJwtStrategy)
