@@ -12,7 +12,9 @@ import { AuthRepository } from './auth.repository';
 
 @Module({
   imports: [
-    forwardRef(() => UsersModule),
+    forwardRef(() => {
+      return UsersModule;
+    }),
     JwtModule.registerAsync({
       useFactory: async () => {
         return {
