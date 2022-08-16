@@ -1,6 +1,5 @@
 import { UsersRepository } from './../users/users.repository';
 import { JwtPayload } from './dto/jwt-payload.dto';
-import { UserPayload, OAuthPayload } from './../users/dto/create-user.dto';
 import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { v4 as uuid4 } from 'uuid';
@@ -19,36 +18,36 @@ export class AuthService {
     private usersRepository: UsersRepository,
   ) {}
 
-  async login(user: User): Promise<JwtToken> {
+  async login(userId: number): Promise<JwtToken> {
     const uuid = uuid4();
-    const payload: JwtPayload = { uuid, sub: user.id };
-    const access_token = this.jwtService.sign(payload);
+    const payload: JwtPayload = { uuid, sub: userId };
+    const accessToken = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
-    const refresh_token = this.jwtService.sign(payload, { expiresIn });
-    this.authRepository.save(uuid, refresh_token, expiresIn);
+    const refreshToken = this.jwtService.sign(payload, { expiresIn });
+    this.authRepository.save(uuid, refreshToken, expiresIn);
     return {
-      access_token,
-      refresh_token,
+      accessToken,
+      refreshToken,
     };
   }
 
   async validateUser(payload: UserSocialDto): Promise<JwtToken> {
-    const { oauth_id, provider, image_uri, name } = payload;
+    const { oauthId, provider, imageUri, name } = payload;
     const existedUser: number = await this.usersRepository.checkByOAuth(
-      oauth_id,
+      oauthId,
       provider,
     );
     if (existedUser) {
-      const user: any = await this.usersRepository.findByUserId(existedUser);
-      return await this.login(user);
+      const user: User = await this.usersRepository.findByUserId(existedUser);
+      return await this.login(user.id);
     } else {
-      const userPayload: UserPayload = { name, image_uri };
-      const oAuthPayload: OAuthPayload = { oauth_id, provider };
-      const user: any = await this.usersService.create(
-        userPayload,
-        oAuthPayload,
+      const userId: number = await this.usersService.create(
+        oauthId,
+        provider,
+        imageUri,
+        name,
       );
-      return await this.login(user);
+      return await this.login(userId);
     }
   }
 
