@@ -8,10 +8,10 @@ export class UsersService {
   async create(
     oauthId: string,
     provider: string,
-    imageUri: string,
+    thumbnail: string,
     name: string,
   ) {
-    const userId = await this.usersRepository.create(name, imageUri);
+    const userId = await this.usersRepository.create(name, thumbnail);
     await this.usersRepository.createOAuth(oauthId, provider, userId);
 
     return userId;

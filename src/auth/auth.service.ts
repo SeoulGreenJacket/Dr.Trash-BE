@@ -32,7 +32,7 @@ export class AuthService {
   }
 
   async validateUser(payload: UserSocialDto): Promise<JwtToken> {
-    const { oauthId, provider, imageUri, name } = payload;
+    const { oauthId, provider, thumbnail, name } = payload;
     const existedUser: number = await this.usersRepository.checkByOAuth(
       oauthId,
       provider,
@@ -44,7 +44,7 @@ export class AuthService {
       const userId: number = await this.usersService.create(
         oauthId,
         provider,
-        imageUri,
+        thumbnail,
         name,
       );
       return await this.login(userId);

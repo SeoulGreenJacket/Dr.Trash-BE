@@ -9,9 +9,9 @@ export class UsersRepository {
   private readonly userTable = `${this.schema}.user`;
   private readonly oauthTable = `${this.schema}.oauth`;
 
-  async create(name: string, imageUri: string) {
+  async create(name: string, thumbnail: string) {
     const result = await this.databaseService.query<{ id: number }>(
-      `INSERT INTO ${this.userTable} (name,imageUri,point) VALUES ('${name}', '${imageUri}', 0) RETURNING id;`,
+      `INSERT INTO ${this.userTable} (name,thumbnail,point) VALUES ('${name}', '${thumbnail}', 0) RETURNING id;`,
     );
     return result.length === 1 ? result[0].id : null;
   }
