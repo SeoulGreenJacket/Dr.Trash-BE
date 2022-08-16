@@ -16,11 +16,14 @@ export class UsersRepository {
     return result.length === 1 ? result[0].id : null;
   }
 
-  async checkByOAuth(oauthId: string, provider: string) {
-    const result = await this.databaseService.query<{ userId: number }>(
-      `SELECT userId FROM ${this.oauthTable} WHERE oauthId='${oauthId}' AND provider='${provider}';`,
-    );
-    return result.length === 1 ? result[0].userId : null;
+  async findByOAuth(oauthId: string, provider: string) {
+    const result = await this.databaseService.query<User>(`
+      SELECT * 
+      FROM ${this.userTable} 
+        JOIN ${this.oauthTable} ON ${this.userTable}.id = ${this.oauthTable}.userId 
+      WHERE ${this.oauthTable}.oauthId='${oauthId}' AND ${this.oauthTable}.provider='${provider}';
+    `);
+    return result.length === 1 ? result[0] : null;
   }
 
   async findByUserId(userId: number) {
@@ -31,9 +34,9 @@ export class UsersRepository {
   }
 
   async createOAuth(oauthId: string, provider: string, userId: number) {
-    const result = await this.databaseService.query<{ id: number }>(
-      `INSERT INTO ${this.oauthTable} (userId, provider, oauthId) VALUES (${userId}, '${provider}', '${oauthId}') RETURNING id;`,
+    const result = await this.databaseService.query<{ userId: number }>(
+      `INSERT INTO ${this.oauthTable} (userId, provider, oauthId) VALUES (${userId}, '${provider}', '${oauthId}') RETURNING userId;`,
     );
-    return result.length === 1 ? result[0].id : null;
+    return result.length === 1 ? result[0].userId : null;
   }
 }
