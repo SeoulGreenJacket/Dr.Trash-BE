@@ -1,17 +1,12 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DatabaseService } from 'src/database/database.service';
-import {
-  CreateOAuthDto,
-  CreateUserDto,
-  OAuthPayload,
-} from './dto/create-user.dto';
 import { UsersRepository } from './users.repository';
 
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
-  //db 테스트용
+  // db 테스트용
   // constructor(private userRepository: UsersRepository) {}
   // @Post('createUser')
   // async create(@Body() user: CreateUserDto) {
