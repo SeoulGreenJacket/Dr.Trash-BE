@@ -1,6 +1,6 @@
-export class User {
+export type User = {
   id: number;
   name: string;
-  image_uri: string;
+  thumbnail: string;
   point: number;
-}
+};
