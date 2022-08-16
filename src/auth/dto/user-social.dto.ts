@@ -1,6 +1,6 @@
 export class UserSocialDto {
   provider: string;
-  oauth_id: string;
+  oauthId: string;
   name: string;
-  image_uri: string;
+  imageUri: string;
 }
