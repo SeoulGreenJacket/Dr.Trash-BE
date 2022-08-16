@@ -6,7 +6,12 @@ import { DatabaseModule } from './../database/database.module';
 import { UsersRepository } from './users.repository';
 
 @Module({
-  imports: [forwardRef(() => AuthModule), DatabaseModule],
+  imports: [
+    forwardRef(() => {
+      return AuthModule;
+    }),
+    DatabaseModule,
+  ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository],
   exports: [UsersService, UsersRepository],
