@@ -18,9 +18,9 @@ export class UsersRepository {
 
   async findByOAuth(oauthId: string, provider: string) {
     const result = await this.databaseService.query<User>(`
-      SELECT * 
+      SELECT ${this.userTable}.* 
       FROM ${this.userTable} 
-        JOIN ${this.oauthTable} ON ${this.userTable}.id = ${this.oauthTable}.userid 
+        JOIN ${this.oauthTable} ON ${this.userTable}.id = ${this.oauthTable}."userId"
       WHERE ${this.oauthTable}.id='${oauthId}' AND ${this.oauthTable}.provider='${provider}';
     `);
     return result.length === 1 ? result[0] : null;
@@ -34,9 +34,9 @@ export class UsersRepository {
   }
 
   async createOAuth(oauthId: string, provider: string, userId: number) {
-    const result = await this.databaseService.query<{ userid: number }>(
-      `INSERT INTO ${this.oauthTable} (userid, provider, id) VALUES (${userId}, '${provider}', '${oauthId}') RETURNING userid;`,
+    const result = await this.databaseService.query<{ userId: number }>(
+      `INSERT INTO ${this.oauthTable} ("userId", provider, id) VALUES (${userId}, '${provider}', '${oauthId}') RETURNING "userId";`,
     );
-    return result.length === 1 ? result[0].userid : null;
+    return result.length === 1 ? result[0].userId : null;
   }
 }
