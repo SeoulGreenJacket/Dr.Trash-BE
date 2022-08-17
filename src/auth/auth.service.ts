@@ -1,5 +1,3 @@
-import { UsersRepository } from './../users/users.repository';
-import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
@@ -11,8 +9,6 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private authRepository: AuthRepository,
-    private usersService: UsersService,
-    private usersRepository: UsersRepository,
   ) {}
 
   async login(userId: number): Promise<JwtTokenResponse> {
