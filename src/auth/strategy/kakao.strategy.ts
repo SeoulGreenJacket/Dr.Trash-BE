@@ -1,8 +1,11 @@
-import { UsersRepository } from 'src/users/users.repository';
+import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
 import { User } from 'src/users/entities/user.entity';
+import { UsersRepository } from 'src/users/users.repository';
 import { UsersService } from 'src/users/users.service';
+
+@Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy) {
   constructor(
     private usersRepository: UsersRepository,
@@ -21,7 +24,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     done: any,
   ) {
     const profileJson = profile._json;
-    const kakaoId = profileJson.id;
+    const kakaoId: bigint = profileJson.id;
     const name = profileJson.kakao_account.profile.nickname;
     const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
