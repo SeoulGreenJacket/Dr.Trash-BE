@@ -5,8 +5,6 @@ import { Injectable } from '@nestjs/common';
 import { v4 as uuid4 } from 'uuid';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
-import { User } from './../users/entities/user.entity';
-import { UserSocialDto } from './dto/user-social.dto';
 import { JwtToken } from './dto/jwt-token.dto';
 
 @Injectable()
@@ -29,26 +27,6 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
-  }
-
-  async validateUser(payload: UserSocialDto): Promise<JwtToken> {
-    const { oauthId, provider, thumbnail, name } = payload;
-    const existedUser: number = await this.usersRepository.checkByOAuth(
-      oauthId,
-      provider,
-    );
-    if (existedUser) {
-      const user: User = await this.usersRepository.findByUserId(existedUser);
-      return await this.login(user.id);
-    } else {
-      const userId: number = await this.usersService.create(
-        oauthId,
-        provider,
-        thumbnail,
-        name,
-      );
-      return await this.login(userId);
-    }
   }
 
   async logout(user: any): Promise<void> {

@@ -1,10 +1,13 @@
-import { AuthService } from './../auth.service';
-import { BadRequestException } from '@nestjs/common';
+import { UsersRepository } from 'src/users/users.repository';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
-
+import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 export class KakaoStrategy extends PassportStrategy(Strategy) {
-  constructor(private authService: AuthService) {
+  constructor(
+    private usersRepository: UsersRepository,
+    private usersService: UsersService,
+  ) {
     super({
       clientID: process.env.CLIENT_ID,
       callbackURL: process.env.CALLBACK_URL,
@@ -17,23 +20,26 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     profile: any,
     done: any,
   ) {
-    const profileAccount = profile._json.kakao_account;
+    const profileJson = profile._json;
+    const provider = 'kakao';
+    const oauthId = profileJson.id;
+    const name = profileJson.kakao_account.profile.nickname;
+    const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
-    const userPayload = {
-      name: profileAccount.profile.nickname,
-      thumnail: profileAccount.profile.thumbnail_image_url,
-      email:
-        profileAccount.email &&
-        profileAccount.is_email_valid &&
-        profileAccount.is_email_verified
-          ? profileAccount.email
-          : null,
-    };
-
-    if (!userPayload.email) {
-      throw new BadRequestException('email is not found');
+    const existedUser: User = await this.usersRepository.findByOAuth(
+      oauthId,
+      provider,
+    );
+    if (existedUser) {
+      return existedUser.id;
+    } else {
+      const userId: number = await this.usersService.create(
+        oauthId,
+        provider,
+        thumbnail,
+        name,
+      );
+      return userId;
     }
-
-    return userPayload;
   }
 }
