@@ -11,8 +11,6 @@ export class AuthService {
   constructor(
     private jwtService: JwtService,
     private authRepository: AuthRepository,
-    private usersService: UsersService,
-    private usersRepository: UsersRepository,
   ) {}
 
   async login(userId: number): Promise<JwtTokenResponse> {
@@ -21,7 +19,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
     const refreshToken = this.jwtService.sign(payload, { expiresIn });
-    await this.authRepository.saveToken(uuid);
+    await this.authRepository.createToken(uuid);
     return {
       accessToken,
       refreshToken,
