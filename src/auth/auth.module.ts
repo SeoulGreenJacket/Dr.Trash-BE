@@ -1,6 +1,6 @@
 import { DatabaseModule } from './../database/database.module';
 import { KakaoStrategy } from './strategy/kakao.strategy';
-import { CacheModule, forwardRef, Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from './../users/users.module';
@@ -26,7 +26,6 @@ import { AuthRepository } from './auth.repository';
       },
     }),
     PassportModule,
-    CacheModule.register(),
     DatabaseModule,
   ],
   controllers: [AuthController],
