@@ -5,10 +5,9 @@ import { DatabaseService } from 'src/database/database.service';
 export class AuthRepository {
   constructor(private databaseService: DatabaseService) {}
   private readonly schema = process.env.DATABASE_APPLICATION_SCHEMA;
-  private readonly userTable = `${this.schema}.user`;
   private readonly tokenTable = `${this.schema}.token`;
 
-  async saveToken(uuid: string) {
+  async createToken(uuid: string) {
     const result = await this.databaseService.query<{ id: string }>(`
     INSERT INTO ${this.tokenTable} (id) VALUES ('${uuid}') RETURNING id;
     `);
