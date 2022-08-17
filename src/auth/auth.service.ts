@@ -1,5 +1,3 @@
-import { UsersRepository } from './../users/users.repository';
-import { UsersService } from './../users/users.service';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
