@@ -1,23 +1,30 @@
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import { Injectable } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class AuthRepository {
-  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+  constructor(private databaseService: DatabaseService) {}
+  private readonly schema = process.env.DATABASE_APPLICATION_SCHEMA;
+  private readonly tokenTable = `${this.schema}.token`;
 
-  async save(uuid: string, token: string, ttl: number): Promise<void> {
-    await this.cacheManager.set(uuid, token, { ttl });
+  async createToken(uuid: string) {
+    const result = await this.databaseService.query<{ id: string }>(`
+    INSERT INTO ${this.tokenTable} (id) VALUES ('${uuid}') RETURNING id;
+    `);
+    return result.length === 1 ? result[0].id : null;
   }
 
-  async find(uuid: string): Promise<string | null> {
-    return this.cacheManager.get(uuid);
+  async deleteToken(uuid: string) {
+    const result = await this.databaseService.query<{ id: string }>(`
+    DELETE FROM ${this.tokenTable} WHERE id='${uuid}';
+    `);
+    return result.length === 1 ? result[0].id : null;
   }
 
-  async delete(uuid: string): Promise<void> {
-    await this.cacheManager.del(uuid);
-  }
-
-  async reset(): Promise<void> {
-    await this.cacheManager.reset();
+  async findToken(uuid: string) {
+    const result = await this.databaseService.query<{ id: string }>(`
+    SELECT id FROM ${this.tokenTable} WHERE id='${uuid}';
+    `);
+    return result.length === 1 ? result[0].id : null;
   }
 }
