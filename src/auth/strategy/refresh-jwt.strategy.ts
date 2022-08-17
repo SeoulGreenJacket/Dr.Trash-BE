@@ -23,7 +23,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
   }
 
   async validate(payload: JwtPayload) {
-    const user: User = await this.usersRepository.findByUserId(payload.sub);
+    const user: User = await this.usersRepository.findByUserId(payload.userId);
     const tokenId = await this.authRepository.findToken(payload.uuid);
     if (!user || !tokenId) {
       throw new UnauthorizedException('user or token not found');

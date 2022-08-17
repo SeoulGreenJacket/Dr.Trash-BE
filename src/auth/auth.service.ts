@@ -13,7 +13,7 @@ export class AuthService {
 
   async login(userId: number): Promise<JwtTokenResponse> {
     const uuid = uuid4();
-    const payload: JwtPayload = { uuid, sub: userId };
+    const payload: JwtPayload = { uuid, userId: userId };
     const accessToken = this.jwtService.sign(payload);
     const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
     const refreshToken = this.jwtService.sign(payload, { expiresIn });

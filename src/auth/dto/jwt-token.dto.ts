@@ -5,5 +5,5 @@ export type JwtTokenResponse = {
 
 export type JwtPayload = {
   uuid: string;
-  sub: number;
+  userId: number;
 };
