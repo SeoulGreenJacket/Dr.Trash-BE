@@ -21,21 +21,16 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     done: any,
   ) {
     const profileJson = profile._json;
-    const provider = 'kakao';
-    const oauthId = profileJson.id;
+    const kakaoId = profileJson.id;
     const name = profileJson.kakao_account.profile.nickname;
     const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
-    const existedUser: User = await this.usersRepository.findByOAuth(
-      oauthId,
-      provider,
-    );
+    const existedUser: User = await this.usersRepository.findByKakaoId(kakaoId);
     if (existedUser) {
       return existedUser.id;
     } else {
       const userId: number = await this.usersService.create(
-        oauthId,
-        provider,
+        kakaoId,
         thumbnail,
         name,
       );
