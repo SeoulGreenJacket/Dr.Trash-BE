@@ -9,16 +9,16 @@ export class UsersRepository {
   private readonly userTable = `${this.schema}.user`;
   private readonly oauthTable = `${this.schema}.oauth`;
 
-  async create(name: string, thumbnail: string, kakaoId: string) {
+  async create(name: string, thumbnail: string, kakaoId: number) {
     const result = await this.databaseService.query<{ id: number }>(
-      `INSERT INTO ${this.userTable} ("kakaoId",name,thumbnail,point) VALUES ('${kakaoId}','${name}', '${thumbnail}', 0) RETURNING id;`,
+      `INSERT INTO ${this.userTable} ("kakaoId",name,thumbnail,point) VALUES (${kakaoId},'${name}', '${thumbnail}', 0) RETURNING id;`,
     );
     return result.length === 1 ? result[0].id : null;
   }
 
-  async findByKakaoId(kakaoId: string) {
+  async findByKakaoId(kakaoId: number) {
     const result = await this.databaseService.query<User>(`
-      SELECT * FROM ${this.userTable} WHERE "kakaoId" = '${kakaoId}';
+      SELECT * FROM ${this.userTable} WHERE "kakaoId" = ${kakaoId};
     `);
     return result.length === 1 ? result[0] : null;
   }
