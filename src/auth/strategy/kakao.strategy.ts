@@ -39,7 +39,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     }
 
     await this.httpService.axiosRef.post(
-      'https://kapi.kakao.com/v1/user/logout',
+      'http://kapi.kakao.com/v1/user/logout',
       {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
