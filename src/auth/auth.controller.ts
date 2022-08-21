@@ -16,13 +16,13 @@ export class AuthController {
   }
 
   @UseGuards(RefreshJwtAuthGuard)
-  @Post('logout')
+  @Delete('logout')
   async logout(@Req() req) {
     return await this.authService.logout(req.user.uuid);
   }
 
   @UseGuards(RefreshJwtAuthGuard)
-  @Delete('refresh')
+  @Post('refresh')
   async refresh(@Req() req) {
     return await this.authService.refresh(req.user.uuid, req.user.userId);
   }
