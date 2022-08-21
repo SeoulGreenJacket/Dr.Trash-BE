@@ -1,5 +1,5 @@
 import { JwtTokenResponse } from './dto/jwt-token.dto';
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 import { ApiTags } from '@nestjs/swagger';
@@ -16,13 +16,13 @@ export class AuthController {
   }
 
   @UseGuards(RefreshJwtAuthGuard)
-  @Get('logout')
+  @Post('logout')
   async logout(@Req() req) {
     return await this.authService.logout(req.user.uuid);
   }
 
   @UseGuards(RefreshJwtAuthGuard)
-  @Get('refresh')
+  @Delete('refresh')
   async refresh(@Req() req) {
     return await this.authService.refresh(req.user.uuid, req.user.userId);
   }

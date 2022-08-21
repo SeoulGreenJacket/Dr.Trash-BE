@@ -5,15 +5,7 @@ import { Injectable } from '@nestjs/common';
 export class UsersService {
   constructor(private usersRepository: UsersRepository) {}
 
-  async create(
-    oauthId: string,
-    provider: string,
-    thumbnail: string,
-    name: string,
-  ) {
-    const userId = await this.usersRepository.create(name, thumbnail);
-    await this.usersRepository.createOAuth(oauthId, provider, userId);
-
-    return userId;
+  async create(kakaoId: bigint, thumbnail: string, name: string) {
+    return await this.usersRepository.create(name, thumbnail, kakaoId);
   }
 }

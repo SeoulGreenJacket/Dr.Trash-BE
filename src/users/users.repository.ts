@@ -7,21 +7,17 @@ export class UsersRepository {
   constructor(private databaseService: DatabaseService) {}
   private readonly schema = process.env.DATABASE_APPLICATION_SCHEMA;
   private readonly userTable = `${this.schema}.user`;
-  private readonly oauthTable = `${this.schema}.oauth`;
 
-  async create(name: string, thumbnail: string) {
+  async create(name: string, thumbnail: string, kakaoId: bigint) {
     const result = await this.databaseService.query<{ id: number }>(
-      `INSERT INTO ${this.userTable} (name,thumbnail,point) VALUES ('${name}', '${thumbnail}', 0) RETURNING id;`,
+      `INSERT INTO ${this.userTable} ("kakaoId",name,thumbnail,point) VALUES (${kakaoId},'${name}', '${thumbnail}', 0) RETURNING id;`,
     );
     return result.length === 1 ? result[0].id : null;
   }
 
-  async findByOAuth(oauthId: string, provider: string) {
+  async findByKakaoId(kakaoId: bigint) {
     const result = await this.databaseService.query<User>(`
-      SELECT ${this.userTable}.* 
-      FROM ${this.userTable} 
-        JOIN ${this.oauthTable} ON ${this.userTable}.id = ${this.oauthTable}."userId"
-      WHERE ${this.oauthTable}.id='${oauthId}' AND ${this.oauthTable}.provider='${provider}';
+      SELECT * FROM ${this.userTable} WHERE "kakaoId" = ${kakaoId};
     `);
     return result.length === 1 ? result[0] : null;
   }
@@ -31,12 +27,5 @@ export class UsersRepository {
       `SELECT * FROM ${this.userTable} WHERE id=${userId};`,
     );
     return result.length === 1 ? result[0] : null;
-  }
-
-  async createOAuth(oauthId: string, provider: string, userId: number) {
-    const result = await this.databaseService.query<{ userId: number }>(
-      `INSERT INTO ${this.oauthTable} ("userId", provider, id) VALUES (${userId}, '${provider}', '${oauthId}') RETURNING "userId";`,
-    );
-    return result.length === 1 ? result[0].userId : null;
   }
 }
