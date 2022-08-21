@@ -28,16 +28,21 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     const name = profileJson.kakao_account.profile.nickname;
     const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
+    let userId: number;
     const existedUser: User = await this.usersRepository.findByKakaoId(kakaoId);
     if (existedUser) {
-      return existedUser.id;
+      userId = existedUser.id;
     } else {
-      const userId: number = await this.usersService.create(
-        kakaoId,
-        thumbnail,
-        name,
-      );
-      return userId;
+      userId = await this.usersService.create(kakaoId, thumbnail, name);
     }
+
+    fetch('/v1/user/logout', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return userId;
   }
 }
