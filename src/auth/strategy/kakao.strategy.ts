@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
@@ -10,6 +11,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
   constructor(
     private usersRepository: UsersRepository,
     private usersService: UsersService,
+    private readonly httpService: HttpService,
   ) {
     super({
       clientID: process.env.CLIENT_ID,
@@ -28,16 +30,24 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     const name = profileJson.kakao_account.profile.nickname;
     const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
+    let userId: number;
     const existedUser: User = await this.usersRepository.findByKakaoId(kakaoId);
     if (existedUser) {
-      return existedUser.id;
+      userId = existedUser.id;
     } else {
-      const userId: number = await this.usersService.create(
-        kakaoId,
-        thumbnail,
-        name,
-      );
-      return userId;
+      userId = await this.usersService.create(kakaoId, thumbnail, name);
     }
+
+    await this.httpService.axiosRef.post(
+      'http://kapi.kakao.com/v1/user/logout',
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    return userId;
   }
 }

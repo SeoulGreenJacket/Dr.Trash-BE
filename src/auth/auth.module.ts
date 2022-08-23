@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { DatabaseModule } from './../database/database.module';
 import { KakaoStrategy } from './strategy/kakao.strategy';
 import { forwardRef, Module } from '@nestjs/common';
@@ -27,6 +28,7 @@ import { AuthRepository } from './auth.repository';
     }),
     PassportModule,
     DatabaseModule,
+    HttpModule,
   ],
   controllers: [AuthController],
   providers: [
