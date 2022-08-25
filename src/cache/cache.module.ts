@@ -10,15 +10,17 @@ import { CacheService } from './cache.service';
       provide: 'REDIS_CLIENT',
       useFactory: () => {
         const { REDIS_HOST: host, REDIS_PORT: port } = process.env;
-        const client = createClient({ url: `redis://${host}:${port}` });
-        client.connect();
-        return client;
+        return createClient({ url: `redis://${host}:${port}` });
       },
     },
   ],
 })
 export class CacheModule implements OnApplicationShutdown {
   constructor(private readonly moduleRef: ModuleRef) {}
+
+  onApplicationBootstrap() {
+    this.moduleRef.get('REDIS_CLIENT').connect();
+  }
 
   onApplicationShutdown() {
     this.moduleRef.get('REDIS_CLIENT').end();
