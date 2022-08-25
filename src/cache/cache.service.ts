@@ -1,10 +1,39 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType as Client } from 'redis';
+import { DatabaseService } from 'src/database/database.service';
 import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
 
 @Injectable()
 export class CacheService {
-  constructor(@Inject('REDIS_CLIENT') private client: Client) {}
+  constructor(
+    @Inject('REDIS_CLIENT') private client: Client,
+    private readonly databaseService: DatabaseService,
+  ) {}
+
+  async migrateUsersPoint() {
+    const usersPoint = await this.databaseService.query<{
+      value: string;
+      score: number;
+    }>(`
+      SELECT "id" AS "value", "point" AS "score" FROM "${process.env.DATABASE_SCHEMA}"."user";
+    `);
+    this.client.zAdd('user-point', usersPoint);
+  }
+
+  async migrateUsersTrash() {
+    const usersTrash = await this.databaseService.query<{
+      userId: number;
+      trashType: string;
+      isCorrect: boolean;
+    }>(`
+      SELECT "userId", "type", "ok" FROM "${process.env.DATABASE_SCHEMA}"."trash";
+    `);
+    usersTrash.map(({ userId, trashType, isCorrect }) => {
+      const key = `user-trash:${userId}`;
+      const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
+      this.client.hIncrBy(key, field, 1);
+    });
+  }
 
   async getUserRank(userId: number): Promise<number> {
     return await this.client.zRevRank('user-point', userId.toString());
@@ -44,5 +73,15 @@ export class CacheService {
         failure: +userTrashSummary['plastic-failure'],
       },
     };
+  }
+
+  updateUserPoint(userId: number, change: number) {
+    this.client.zIncrBy('user-point', change, userId.toString());
+  }
+
+  updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
+    const key = `user-trash:${userId}`;
+    const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
+    this.client.hIncrBy(key, field, 1);
   }
 }

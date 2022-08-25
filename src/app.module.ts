@@ -3,16 +3,18 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
+import { CacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
     AuthModule,
+    CacheModule,
+    DatabaseModule,
     UsersModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.development.env',
     }),
-    DatabaseModule,
   ],
 })
 export class AppModule {}

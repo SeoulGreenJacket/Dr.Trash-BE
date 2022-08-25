@@ -1,9 +1,11 @@
 import { Module, OnApplicationShutdown } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { createClient } from 'redis';
+import { DatabaseModule } from 'src/database/database.module';
 import { CacheService } from './cache.service';
 
 @Module({
+  imports: [DatabaseModule],
   providers: [
     CacheService,
     {
@@ -16,10 +18,15 @@ import { CacheService } from './cache.service';
   ],
 })
 export class CacheModule implements OnApplicationShutdown {
-  constructor(private readonly moduleRef: ModuleRef) {}
+  constructor(
+    private readonly moduleRef: ModuleRef,
+    private readonly cacheService: CacheService,
+  ) {}
 
-  onApplicationBootstrap() {
-    this.moduleRef.get('REDIS_CLIENT').connect();
+  async onApplicationBootstrap() {
+    await this.moduleRef.get('REDIS_CLIENT').connect();
+    this.cacheService.migrateUsersPoint();
+    this.cacheService.migrateUsersTrash();
   }
 
   onApplicationShutdown() {
