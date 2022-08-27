@@ -1,8 +1,4 @@
-import {
-  createParamDecorator,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export const UserId = createParamDecorator(
   (data: unknown, context: ExecutionContext) => {
@@ -11,9 +7,10 @@ export const UserId = createParamDecorator(
       if (user) {
         return user.id;
       } else {
-        throw new UnauthorizedException();
+        return undefined;
       }
+    } else {
+      throw new Error('User decorator only works with http requests');
     }
-    throw new Error('User decorator only works with http requests');
   },
 );
