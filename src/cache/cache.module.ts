@@ -1,6 +1,7 @@
 import { Module, OnApplicationShutdown } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { createClient } from 'redis';
+import { redis } from 'src/common/environments';
 import { DatabaseModule } from 'src/database/database.module';
 import { CacheService } from './cache.service';
 
@@ -11,8 +12,7 @@ import { CacheService } from './cache.service';
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
-        const { REDIS_HOST: host, REDIS_PORT: port } = process.env;
-        return createClient({ url: `redis://${host}:${port}` });
+        return createClient(redis.config);
       },
     },
   ],

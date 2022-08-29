@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
 import { JwtPayload, JwtTokenResponse } from './dto/jwt-token.dto';
 import { v4 as uuid4 } from 'uuid';
+import { jwt } from 'src/common/environments';
 
 @Injectable()
 export class AuthService {
@@ -13,10 +14,12 @@ export class AuthService {
 
   async login(userId: number): Promise<JwtTokenResponse> {
     const uuid = uuid4();
-    const payload: JwtPayload = { uuid, userId: userId };
+    const payload: JwtPayload = { uuid, userId };
     const accessToken = this.jwtService.sign(payload);
-    const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn });
+    const refreshToken = this.jwtService.sign(
+      payload,
+      jwt.refreshConfig.signOptions,
+    );
     await this.authRepository.createToken(uuid);
     return {
       accessToken,
