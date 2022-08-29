@@ -12,12 +12,14 @@ export class CacheService {
 
   async migrateUsersPoint() {
     const usersPoint = await this.databaseService.query<{
-      value: string;
-      score: number;
+      id: number;
+      point: number;
     }>(`
-      SELECT "id" AS "value", "point" AS "score" FROM "${process.env.DATABASE_SCHEMA}"."user";
+      SELECT "id", "point" FROM "${process.env.DATABASE_APPLICATION_SCHEMA}"."user";
     `);
-    this.client.zAdd('user-point', usersPoint);
+    usersPoint.map(({ id, point }) => {
+      this.client.zAdd('user-point', { score: point, value: id.toString() });
+    });
   }
 
   async migrateUsersTrash() {
