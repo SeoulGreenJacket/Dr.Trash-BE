@@ -10,6 +10,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { RefreshJwtStrategy } from './strategy/refresh-jwt.strategy';
 import { AuthRepository } from './auth.repository';
+import { jwt } from 'src/common/environments';
 
 @Module({
   imports: [
@@ -18,12 +19,7 @@ import { AuthRepository } from './auth.repository';
     }),
     JwtModule.registerAsync({
       useFactory: async () => {
-        return {
-          secret: process.env.JWT_SECRET,
-          signOptions: {
-            expiresIn: process.env.JWT_ACCESS_EXPIRE_IN,
-          },
-        };
+        return jwt.accessConfig;
       },
     }),
     PassportModule,

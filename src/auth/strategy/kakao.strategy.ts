@@ -2,6 +2,7 @@ import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
+import { kakao } from 'src/common/environments';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRepository } from 'src/users/users.repository';
 import { UsersService } from 'src/users/users.service';
@@ -13,10 +14,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     private usersService: UsersService,
     private readonly httpService: HttpService,
   ) {
-    super({
-      clientID: process.env.CLIENT_ID,
-      callbackURL: process.env.CALLBACK_URL,
-    });
+    super(kakao.config);
   }
 
   async validate(
