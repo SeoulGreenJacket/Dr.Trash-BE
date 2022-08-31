@@ -1,4 +1,4 @@
-import { JwtTokenResponse } from './types/jwt-token.dto';
+import { JwtTokenResponseDto } from './dto/jwt-token-response.dto';
 import { Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
@@ -11,7 +11,7 @@ export class AuthController {
 
   @UseGuards(KakaoAuthGuard)
   @Get('login/kakao')
-  async loginWithKakao(@Req() req): Promise<JwtTokenResponse> {
+  async loginWithKakao(@Req() req): Promise<JwtTokenResponseDto> {
     return await this.authService.login(req.user);
   }
 

@@ -1,4 +1,4 @@
-import { JwtPayload } from '../types/jwt-token.dto';
+import { JwtPayload } from '../types/jwt-token-payload.type';
 import { User } from 'src/users/entities/user.entity';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';

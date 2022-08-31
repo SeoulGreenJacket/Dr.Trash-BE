@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
-import { JwtPayload, JwtTokenResponse } from './types/jwt-token.dto';
+import { JwtPayload } from './types/jwt-token-payload.type';
 import { v4 as uuid4 } from 'uuid';
+import { JwtTokenResponseDto } from './dto/jwt-token-response.dto';
 
 @Injectable()
 export class AuthService {
@@ -11,7 +12,7 @@ export class AuthService {
     private authRepository: AuthRepository,
   ) {}
 
-  async login(userId: number): Promise<JwtTokenResponse> {
+  async login(userId: number): Promise<JwtTokenResponseDto> {
     const uuid = uuid4();
     const payload: JwtPayload = { uuid, userId: userId };
     const accessToken = this.jwtService.sign(payload);
@@ -28,7 +29,7 @@ export class AuthService {
     await this.authRepository.deleteToken(uuid);
   }
 
-  async refresh(uuid: string, userId: number): Promise<JwtTokenResponse> {
+  async refresh(uuid: string, userId: number): Promise<JwtTokenResponseDto> {
     await this.authRepository.deleteToken(uuid);
     return await this.login(userId);
   }
