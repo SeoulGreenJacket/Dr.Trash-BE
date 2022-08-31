@@ -34,4 +34,7 @@ export class Trashcan {
 
   @IsDate()
   createdAt: Date;
+
+  @IsDate()
+  updatedAt: Date;
 }
