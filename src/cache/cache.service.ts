@@ -60,20 +60,20 @@ export class CacheService {
     const userTrashSummary = await this.client.hGetAll(`user-trash:${userId}`);
     return {
       can: {
-        success: +userTrashSummary['can-success'],
-        failure: +userTrashSummary['can-failure'],
+        success: +(userTrashSummary['can-success'] ?? 0),
+        failure: +(userTrashSummary['can-failure'] ?? 0),
       },
       pet: {
-        success: +userTrashSummary['pet-success'],
-        failure: +userTrashSummary['pet-failure'],
+        success: +(userTrashSummary['pet-success'] ?? 0),
+        failure: +(userTrashSummary['pet-failure'] ?? 0),
       },
       paper: {
-        success: +userTrashSummary['paper-success'],
-        failure: +userTrashSummary['paper-failure'],
+        success: +(userTrashSummary['paper-success'] ?? 0),
+        failure: +(userTrashSummary['paper-failure'] ?? 0),
       },
       plastic: {
-        success: +userTrashSummary['plastic-success'],
-        failure: +userTrashSummary['plastic-failure'],
+        success: +(userTrashSummary['plastic-success'] ?? 0),
+        failure: +(userTrashSummary['plastic-failure'] ?? 0),
       },
     };
   }

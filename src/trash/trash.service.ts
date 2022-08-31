@@ -10,12 +10,23 @@ export class TrashService {
     private readonly cacheService: CacheService,
   ) {}
 
-  async beginTrashcanUsage(userId: number, trashcanId: number): Promise<void> {
-    await this.trashRepository.logTrashcanUsage(userId, trashcanId, true);
+  async beginTrashcanUsage(
+    userId: number,
+    trashcanId: number,
+  ): Promise<boolean> {
+    return await this.trashRepository.logTrashcanUsage(
+      userId,
+      trashcanId,
+      true,
+    );
   }
 
-  async endTrashcanUsage(userId: number, trashcanId: number): Promise<void> {
-    await this.trashRepository.logTrashcanUsage(userId, trashcanId, false);
+  async endTrashcanUsage(userId: number, trashcanId: number): Promise<boolean> {
+    return await this.trashRepository.logTrashcanUsage(
+      userId,
+      trashcanId,
+      false,
+    );
   }
 
   async getUserTrashSummary(userId: number): Promise<TrashSummary> {

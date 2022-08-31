@@ -8,5 +8,6 @@ import { DatabaseModule } from 'src/database/database.module';
   imports: [DatabaseModule],
   controllers: [TrashcansController],
   providers: [TrashcansService, TrashcansRepository],
+  exports: [TrashcansRepository],
 })
 export class TrashcansModule {}

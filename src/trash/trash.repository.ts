@@ -1,10 +1,9 @@
 import { DatabaseService } from 'src/database/database.service';
+import { database } from 'src/common/environments';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class TrashRepository {
-  private readonly schema = process.env.DATABASE_APPLICATION_SCHEMA;
-  private readonly trashTable = `"${this.schema}"."trash"`;
-  private readonly trashcanUsageTable = `"${this.schema}"."trashcanUsage"`;
-
   constructor(private databaseService: DatabaseService) {}
 
   async logTrashcanUsage(
@@ -12,9 +11,9 @@ export class TrashRepository {
     trashcanId: number,
     open: boolean,
   ): Promise<boolean> {
-    const queryResult = await this.databaseService.query<{ id: number }>(`
+    const queryResult = await this.databaseService.query<{ id: string }>(`
       INSERT INTO
-        ${this.trashcanUsageTable}
+        ${database.tables.trashcanUsage}
         (
           "userId",
           "trashcanId",
