@@ -1,4 +1,4 @@
-import { JwtPayload } from './../dto/jwt-token.dto';
+import { JwtPayload } from '../types/jwt-token.dto';
 import { User } from 'src/users/entities/user.entity';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload) {
     const user: User = await this.usersRepository.findByUserId(payload.userId);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('user not found');
     }
     return user;
   }
