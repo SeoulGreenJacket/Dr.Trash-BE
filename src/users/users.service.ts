@@ -2,7 +2,7 @@ import { CacheService } from './../cache/cache.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { Injectable } from '@nestjs/common';
-import { Achievement } from './types/achievement.type';
+import { Achievement } from './entities/achievement.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserRankResponseDto } from './dto/user-rank-response.dto';

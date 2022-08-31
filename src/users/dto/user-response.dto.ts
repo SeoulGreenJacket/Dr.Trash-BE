@@ -6,7 +6,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Achievement } from '../types/achievement.type';
+import { Achievement } from '../entities/achievement.entity';
 import { Grade } from '../types/grade.enum';
 
 export class UserResponseDto {
