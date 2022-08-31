@@ -18,12 +18,14 @@ export class CacheService {
     }>(`
       SELECT "id", "point" FROM ${database.tables.user};
     `);
-    usersPoint.map(({ id, point }) => {
-      this.client.zAdd('user-point', {
-        score: point,
-        value: id.toString(),
-      });
-    });
+    Promise.all(
+      usersPoint.map(({ id, point }) => {
+        this.client.zAdd('user-point', {
+          score: point,
+          value: id.toString(),
+        });
+      }),
+    );
   }
 
   async migrateUsersTrash() {
