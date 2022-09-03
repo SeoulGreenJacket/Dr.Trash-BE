@@ -19,8 +19,8 @@ export class CacheService {
       SELECT "id", "point" FROM ${database.tables.user};
     `);
     Promise.all(
-      usersPoint.map(({ id, point }) => {
-        this.client.zAdd('user-point', {
+      usersPoint.map(async ({ id, point }) => {
+        await this.client.zAdd('user-point', {
           score: point,
           value: id.toString(),
         });
