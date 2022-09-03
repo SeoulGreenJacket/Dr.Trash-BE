@@ -45,7 +45,9 @@ export class UsersRepository {
 
   async update(name: string, thumbnail: string, id: number): Promise<User> {
     const result = await this.databaseService.query<User>(
-      `SELECT * FROM ${database.tables.user} WHERE id=${userId};`,
+      `UPDATE ${database.tables.user} SET name='${name}', thumbnail='${thumbnail}' 
+        WHERE id=${id} 
+        RETURNING *;`,
     );
     return result.length === 1 ? result[0] : null;
   }
