@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType as Client } from 'redis';
+import { database } from 'src/common/environments';
 import { DatabaseService } from 'src/database/database.service';
 import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
 
@@ -12,12 +13,14 @@ export class CacheService {
 
   async migrateUsersPoint() {
     const usersPoint = await this.databaseService.query<{
-      value: string;
-      score: number;
+      id: number;
+      point: number;
     }>(`
-      SELECT "id" AS "value", "point" AS "score" FROM "${process.env.DATABASE_SCHEMA}"."user";
+      SELECT "id", "point" FROM ${database.tables.user};
     `);
-    this.client.zAdd('user-point', usersPoint);
+    usersPoint.map(({ id, point }) => {
+      this.client.zAdd('user-point', { score: point, value: id.toString() });
+    });
   }
 
   async migrateUsersTrash() {
@@ -26,7 +29,7 @@ export class CacheService {
       trashType: string;
       isCorrect: boolean;
     }>(`
-      SELECT "userId", "type", "ok" FROM "${process.env.DATABASE_SCHEMA}"."trash";
+      SELECT "userId", "type", "ok" FROM ${database.tables.trash};
     `);
     usersTrash.map(({ userId, trashType, isCorrect }) => {
       const key = `user-trash:${userId}`;
