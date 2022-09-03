@@ -29,7 +29,11 @@ export class TrashService {
     );
   }
 
-  async getUserTrashSummary(userId: number): Promise<TrashSummary> {
-    return await this.cacheService.getUserTrashSummary(userId);
+  async getUserTrashSummary(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<TrashSummary> {
+    return await this.cacheService.getUserTrashSummary(userId, year, month);
   }
 }

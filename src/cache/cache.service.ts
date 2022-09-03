@@ -18,24 +18,32 @@ export class CacheService {
     }>(`
       SELECT "id", "point" FROM ${database.tables.user};
     `);
-    usersPoint.map(({ id, point }) => {
-      this.client.zAdd('user-point', { score: point, value: id.toString() });
-    });
+    return Promise.all(
+      usersPoint.map(({ id, point }) => {
+        return this.client.zAdd('user-point', {
+          score: point,
+          value: id.toString(),
+        });
+      }),
+    );
   }
 
   async migrateUsersTrash() {
     const usersTrash = await this.databaseService.query<{
-      userId: number;
-      trashType: string;
-      isCorrect: boolean;
+      userId: string;
+      type: string;
+      at: Date;
+      ok: string;
     }>(`
-      SELECT "userId", "type", "ok" FROM ${database.tables.trash};
+      SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash};
     `);
-    usersTrash.map(({ userId, trashType, isCorrect }) => {
-      const key = `user-trash:${userId}`;
-      const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
-      this.client.hIncrBy(key, field, 1);
-    });
+    return Promise.all(
+      usersTrash.map(({ userId, type, at, ok }) => {
+        const key = `user-trash:${userId}-${at.getUTCFullYear()}-${at.getUTCMonth()}`;
+        const field = `${type}-${ok ? 'success' : 'failure'}`;
+        return this.client.hIncrBy(key, field, 1);
+      }),
+    );
   }
 
   async getUserRank(userId: number): Promise<number> {
@@ -56,8 +64,14 @@ export class CacheService {
     });
   }
 
-  async getUserTrashSummary(userId: number): Promise<TrashSummary> {
-    const userTrashSummary = await this.client.hGetAll(`user-trash:${userId}`);
+  async getUserTrashSummary(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<TrashSummary> {
+    const userTrashSummary = await this.client.hGetAll(
+      `user-trash:${userId}-${year}-${month}`,
+    );
     return {
       can: {
         success: +(userTrashSummary['can-success'] ?? 0),
@@ -83,7 +97,8 @@ export class CacheService {
   }
 
   updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
-    const key = `user-trash:${userId}`;
+    const today = new Date();
+    const key = `user-trash:${userId}-${today.getUTCFullYear()}-${today.getUTCMonth()}`;
     const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
     this.client.hIncrBy(key, field, 1);
   }
