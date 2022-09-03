@@ -24,6 +24,13 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @Get()
+  async findMe(@Req() req): Promise<any> {
+    return req.user.id;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
   @Get('rank')
   async findRankAll(
     @Query('limit', ParseIntPipe, new DefaultValuePipe(10)) limit: number,
