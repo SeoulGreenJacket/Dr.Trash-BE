@@ -42,10 +42,10 @@ export class AchievementsRepository {
   async getAchievements(): Promise<Achievement[]> {
     const query = `
       SELECT
-        id,
-        name,
-        description,
-        imageUri
+        "id",
+        "name",
+        "description",
+        "imageUri"
       FROM
         ${database.tables.achievement}
     `;
@@ -67,11 +67,11 @@ export class AchievementsRepository {
   async getUserAchievements(userId: number): Promise<UserAchievement[]> {
     const query = `
       SELECT
-        id,
-        name,
-        description,
-        imageUri,
-        achievedAt
+        "id",
+        "name",
+        "description",
+        "imageUri",
+        "achievedAt"
       FROM
         ${database.tables.achievement}
         LEFT JOIN
