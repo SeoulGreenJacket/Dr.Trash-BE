@@ -11,6 +11,8 @@ export const database = {
     token: `"${process.env.DATABASE_SCHEMA}"."token"`,
     trash: `"${process.env.DATABASE_SCHEMA}"."trash"`,
     trashcan: `"${process.env.DATABASE_SCHEMA}"."trashcan"`,
+    achievement: `"${process.env.DATABASE_SCHEMA}"."achievement"`,
+    achiever: `"${process.env.DATABASE_SCHEMA}"."achiever"`,
   },
 };
 
@@ -39,5 +41,10 @@ export const kakao = {
 export const redis = {
   config: {
     url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+  },
+  keys: {
+    userPoint: 'user-point',
+    userTrash: 'user-trash',
+    achievementNotification: 'achievement-notification',
   },
 };

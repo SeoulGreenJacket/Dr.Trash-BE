@@ -1,14 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType as Client } from 'redis';
-import { database } from 'src/common/environments';
+import { AchievementsRepository } from 'src/achievements/achievements.repository';
+import { database, redis } from 'src/common/environments';
 import { DatabaseService } from 'src/database/database.service';
-import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
 
 @Injectable()
 export class CacheService {
   constructor(
     @Inject('REDIS_CLIENT') private client: Client,
     private readonly databaseService: DatabaseService,
+    private readonly achievementsRepository: AchievementsRepository,
   ) {}
 
   async migrateUsersPoint() {
@@ -19,7 +20,10 @@ export class CacheService {
       SELECT "id", "point" FROM ${database.tables.user};
     `);
     usersPoint.map(({ id, point }) => {
-      this.client.zAdd('user-point', { score: point, value: id.toString() });
+      this.client.zAdd(redis.keys.userPoint, {
+        score: point,
+        value: id.toString(),
+      });
     });
   }
 
@@ -39,12 +43,12 @@ export class CacheService {
   }
 
   async getUserRank(userId: number): Promise<number> {
-    return await this.client.zRevRank('user-point', userId.toString());
+    return await this.client.zRevRank(redis.keys.userPoint, userId.toString());
   }
 
   async getUserRankList(offset: number, limit: number): Promise<number[]> {
     const userRankList = await this.client.zRange(
-      'user-point',
+      redis.keys.userPoint,
       offset,
       offset + limit - 1,
       {
@@ -56,35 +60,52 @@ export class CacheService {
     });
   }
 
-  async getUserTrashSummary(userId: number): Promise<TrashSummary> {
-    const userTrashSummary = await this.client.hGetAll(`user-trash:${userId}`);
+  async getUserTrash(userId: number) {
+    const userTrash = await this.client.hGetAll(
+      `${redis.keys.userTrash}:${userId}`,
+    );
     return {
-      can: {
-        success: +userTrashSummary['can-success'],
-        failure: +userTrashSummary['can-failure'],
-      },
-      pet: {
-        success: +userTrashSummary['pet-success'],
-        failure: +userTrashSummary['pet-failure'],
+      plastic: {
+        success: +userTrash['plastic-success'],
+        failure: +userTrash['plastic-failure'],
       },
       paper: {
-        success: +userTrashSummary['paper-success'],
-        failure: +userTrashSummary['paper-failure'],
+        success: +userTrash['paper-success'],
+        failure: +userTrash['paper-failure'],
       },
-      plastic: {
-        success: +userTrashSummary['plastic-success'],
-        failure: +userTrashSummary['plastic-failure'],
+      can: {
+        success: +userTrash['can-success'],
+        failure: +userTrash['can-failure'],
       },
     };
   }
 
-  updateUserPoint(userId: number, change: number) {
-    this.client.zIncrBy('user-point', change, userId.toString());
+  async getAchievementNotifications(userId: number) {
+    const achievementIds = await this.client.sMembers(
+      `${redis.keys.achievementNotification}:${userId}`,
+    );
+    await this.client.del(`${redis.keys.achievementNotification}:${userId}`);
+    return Promise.all(
+      achievementIds.map((id) => {
+        return this.achievementsRepository.getAchievement(+id);
+      }),
+    );
   }
 
-  updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
-    const key = `user-trash:${userId}`;
+  async updateUserPoint(userId: number, change: number) {
+    await this.client.zIncrBy(redis.keys.userPoint, change, userId.toString());
+  }
+
+  async updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
+    const key = `${redis.keys.userTrash}:${userId}`;
     const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
-    this.client.hIncrBy(key, field, 1);
+    await this.client.hIncrBy(key, field, 1);
+  }
+
+  async updateAchievementNotification(userId: number, achievementId: number) {
+    await this.client.sAdd(
+      `${redis.keys.achievementNotification}:${userId}`,
+      achievementId.toString(),
+    );
   }
 }
