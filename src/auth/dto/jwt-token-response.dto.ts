@@ -4,6 +4,7 @@ export class JwtTokenResponseDto {
   @IsNotEmpty()
   @IsJWT()
   accessToken: string;
+
   @IsNotEmpty()
   @IsJWT()
   refreshToken: string;
