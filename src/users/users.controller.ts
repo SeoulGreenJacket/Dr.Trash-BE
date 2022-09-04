@@ -1,3 +1,5 @@
+import { UserRankResponseDto } from 'src/users/dto/user-rank-response.dto';
+import { UserResponseDto } from './dto/user-response.dto';
 import { CheckUserIdGuard } from './guard/check-user-id.guard';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UsersService } from 'src/users/users.service';
@@ -13,6 +15,8 @@ import {
   Query,
   Req,
   UseGuards,
+  UsePipes,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
@@ -35,7 +39,7 @@ export class UsersController {
   async findRankAll(
     @Query('limit', ParseIntPipe, new DefaultValuePipe(10)) limit: number,
     @Query('offset', ParseIntPipe, new DefaultValuePipe(0)) offset: number,
-  ): Promise<any> {
+  ): Promise<UserRankResponseDto[]> {
     return await this.usersService.findRankAll(limit, offset);
   }
 
@@ -43,10 +47,20 @@ export class UsersController {
   @UseGuards(CheckUserIdGuard)
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  async findOne(@Param('id') id: number): Promise<any> {
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserResponseDto> {
     return await this.usersService.findOne(id);
   }
 
+  @UsePipes(
+    new ValidationPipe({
+      enableDebugMessages: true,
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  )
   @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
   @UseGuards(JwtAuthGuard)
@@ -63,7 +77,7 @@ export class UsersController {
   @UseGuards(CheckUserIdGuard)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<number> {
     return await this.usersService.delete(id);
   }
 }
