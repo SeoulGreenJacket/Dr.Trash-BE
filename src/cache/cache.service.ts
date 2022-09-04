@@ -19,13 +19,15 @@ export class CacheService {
       SELECT "id", "point" FROM ${database.tables.user};
     `);
     Promise.all(
-      usersPoint.map(async ({ id, point }) => {
-        await this.client.zAdd('user-point', {
+      usersPoint.map(({ id, point }) => {
+        return this.client.zAdd('user-point', {
           score: point,
           value: id.toString(),
         });
       }),
-    );
+    ).catch((error) => {
+      console.log('migrate to redis failed: ', error);
+    });
   }
 
   async migrateUsersTrash() {
