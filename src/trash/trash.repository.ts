@@ -13,7 +13,7 @@ export class TrashRepository {
   ): Promise<boolean> {
     const queryResult = await this.databaseService.query<{ id: string }>(`
       INSERT INTO
-        ${database.tables.trashcanUsage}
+        ${database().tables.trashcanUsage}
         (
           "userId",
           "trashcanId",

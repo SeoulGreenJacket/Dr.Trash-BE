@@ -19,7 +19,7 @@ import { jwt } from 'src/common/environments';
     }),
     JwtModule.registerAsync({
       useFactory: async () => {
-        return jwt.accessConfig;
+        return jwt().accessConfig;
       },
     }),
     PassportModule,

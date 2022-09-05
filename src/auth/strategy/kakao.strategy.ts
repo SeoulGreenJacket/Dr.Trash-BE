@@ -14,7 +14,7 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     private usersService: UsersService,
     private readonly httpService: HttpService,
   ) {
-    super(kakao.config);
+    super(kakao().config);
   }
 
   async validate(

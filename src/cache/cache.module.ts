@@ -12,7 +12,7 @@ import { CacheService } from './cache.service';
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
-        return createClient(redis.config);
+        return createClient(redis().config);
       },
     },
   ],

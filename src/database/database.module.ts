@@ -10,7 +10,7 @@ import { DatabaseService } from './database.service';
     {
       provide: 'DATABASE_POOL',
       useFactory: () => {
-        return new Pool(database.config);
+        return new Pool(database().config);
       },
     },
   ],

@@ -16,7 +16,7 @@ export class CacheService {
       id: number;
       point: number;
     }>(`
-      SELECT "id", "point" FROM ${database.tables.user};
+      SELECT "id", "point" FROM ${database().tables.user};
     `);
 
     try {
@@ -40,7 +40,7 @@ export class CacheService {
       at: Date;
       ok: string;
     }>(`
-      SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash};
+      SELECT "userId", "type", "at", "ok" FROM ${database().tables.trash};
     `);
     return Promise.all(
       usersTrash.map(({ userId, type, at, ok }) => {

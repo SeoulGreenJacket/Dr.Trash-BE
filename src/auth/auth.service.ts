@@ -18,7 +18,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(
       payload,
-      jwt.refreshConfig.signOptions,
+      jwt().refreshConfig.signOptions,
     );
     await this.authRepository.createToken(uuid);
     return {
