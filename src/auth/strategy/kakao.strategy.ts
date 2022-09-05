@@ -28,13 +28,11 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     const name = profileJson.kakao_account.profile.nickname;
     const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
-    let userId: number;
-    const existedUser: User = await this.usersRepository.findByKakaoId(kakaoId);
-    if (existedUser) {
-      userId = existedUser.id;
-    } else {
-      userId = await this.usersService.create(kakaoId, thumbnail, name);
+    let existedUser: User = await this.usersRepository.findByKakaoId(kakaoId);
+    if (!existedUser) {
+      existedUser = await this.usersService.create(kakaoId, thumbnail, name);
     }
+
 
     await this.httpService.axiosRef.post(
       'http://kapi.kakao.com/v1/user/logout',
@@ -46,6 +44,6 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       },
     );
 
-    return userId;
+    return existedUser;
   }
 }

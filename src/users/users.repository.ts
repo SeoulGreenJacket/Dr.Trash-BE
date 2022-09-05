@@ -12,11 +12,11 @@ export class UsersRepository {
     name: string,
     thumbnail: string,
     kakaoId: bigint,
-  ): Promise<number> {
-    const result = await this.databaseService.query<{ id: number }>(
-      `INSERT INTO ${database.tables.user} ("kakaoId",name,thumbnail,point) VALUES (${kakaoId},'${name}', '${thumbnail}', 0) RETURNING id;`,
+  ): Promise<User> {
+    const result = await this.databaseService.query<User>(
+      `INSERT INTO ${database.tables.user} ("kakaoId",name,thumbnail,point) VALUES (${kakaoId},'${name}', '${thumbnail}', 0) RETURNING *;`,
     );
-    return result.length === 1 ? result[0].id : null;
+    return result.length === 1 ? result[0] : null;
   }
 
   async findByKakaoId(kakaoId: bigint) {
