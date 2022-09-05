@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RefreshJwtAuthGuard } from './guard/refresh-jwt-auth.guard';
+import { UserId } from './decorator/user-id.decorator';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -11,8 +12,8 @@ export class AuthController {
 
   @UseGuards(KakaoAuthGuard)
   @Get('login/kakao')
-  async loginWithKakao(@Req() req): Promise<JwtTokenResponseDto> {
-    return await this.authService.login(req.user);
+  async loginWithKakao(@UserId() id: number): Promise<JwtTokenResponseDto> {
+    return await this.authService.login(id);
   }
 
   @ApiBearerAuth()
@@ -25,7 +26,7 @@ export class AuthController {
   @ApiBearerAuth()
   @UseGuards(RefreshJwtAuthGuard)
   @Post('refresh')
-  async refresh(@Req() req) {
-    return await this.authService.refresh(req.user.uuid, req.user.userId);
+  async refresh(@Req() req, @UserId() id: number) {
+    return await this.authService.refresh(req.user.uuid, id);
   }
 }
