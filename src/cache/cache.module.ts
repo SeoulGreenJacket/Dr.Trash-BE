@@ -16,6 +16,7 @@ import { CacheService } from './cache.service';
       },
     },
   ],
+  exports: [CacheService],
 })
 export class CacheModule implements OnApplicationShutdown {
   constructor(
