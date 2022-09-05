@@ -27,10 +27,8 @@ export class CacheService {
           });
         }),
       );
-    } catch {
-      (error) => {
-        console.log('migrate to redis failed: ', error);
-      };
+    } catch (error) {
+      console.log('migrate to redis failed: ', error);
     }
   }
 
