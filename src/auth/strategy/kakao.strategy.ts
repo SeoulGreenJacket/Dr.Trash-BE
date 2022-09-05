@@ -33,7 +33,6 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       existedUser = await this.usersService.create(kakaoId, thumbnail, name);
     }
 
-
     await this.httpService.axiosRef.post(
       'http://kapi.kakao.com/v1/user/logout',
       {
