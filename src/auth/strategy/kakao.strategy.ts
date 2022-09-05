@@ -36,15 +36,12 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
       userId = await this.usersService.create(kakaoId, thumbnail, name);
     }
 
-    await this.httpService.axiosRef.post(
-      'http://kapi.kakao.com/v1/user/logout',
-      {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          Authorization: `Bearer ${accessToken}`,
-        },
+    this.httpService.post('http://kapi.kakao.com/v1/user/logout', {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Bearer ${accessToken}`,
       },
-    );
+    });
 
     return userId;
   }
