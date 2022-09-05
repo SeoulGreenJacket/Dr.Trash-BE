@@ -18,14 +18,19 @@ export class CacheService {
     }>(`
       SELECT "id", "point" FROM ${database.tables.user};
     `);
-    return Promise.all(
-      usersPoint.map(({ id, point }) => {
-        return this.client.zAdd('user-point', {
-          score: point,
-          value: id.toString(),
-        });
-      }),
-    );
+
+    try {
+      await Promise.all(
+        usersPoint.map(({ id, point }) => {
+          return this.client.zAdd('user-point', {
+            score: point,
+            value: id.toString(),
+          });
+        }),
+      );
+    } catch (error) {
+      console.log('migrate to redis failed: ', error);
+    }
   }
 
   async migrateUsersTrash() {
@@ -46,12 +51,22 @@ export class CacheService {
     );
   }
 
-  async getUserRank(userId: number): Promise<number> {
-    return await this.client.zRevRank('user-point', userId.toString());
+  async addUserPoint(userId: number, point: number) {
+    await this.client.zAdd('user-point', {
+      score: point,
+      value: userId.toString(),
+    });
   }
 
-  async getUserRankList(offset: number, limit: number): Promise<number[]> {
-    const userRankList = await this.client.zRange(
+  async getUserRank(userId: number): Promise<number> {
+    return (await this.client.zRevRank('user-point', userId.toString())) + 1;
+  }
+
+  async getUserRankList(
+    limit: number,
+    offset: number,
+  ): Promise<{ score: number; value: number }[]> {
+    const userRankList = await this.client.zRangeWithScores(
       'user-point',
       offset,
       offset + limit - 1,
@@ -59,8 +74,8 @@ export class CacheService {
         REV: true,
       },
     );
-    return userRankList.map((userId) => {
-      return +userId;
+    return userRankList.map(({ score, value }) => {
+      return { score, value: parseInt(value) };
     });
   }
 
@@ -92,8 +107,8 @@ export class CacheService {
     };
   }
 
-  updateUserPoint(userId: number, change: number) {
-    this.client.zIncrBy('user-point', change, userId.toString());
+  async updateUserPoint(userId: number, change: number) {
+    await this.client.zIncrBy('user-point', change, userId.toString());
   }
 
   updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
