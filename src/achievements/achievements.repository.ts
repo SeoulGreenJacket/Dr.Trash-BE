@@ -78,7 +78,7 @@ export class AchievementsRepository {
         ${database.tables.achiever}
         ON
         ${database.tables.achievement}."id" = ${database.tables.achiever}."achievementId"
-      WHERE
+        AND
         ${database.tables.achiever}."userId" = $1
     `;
 
