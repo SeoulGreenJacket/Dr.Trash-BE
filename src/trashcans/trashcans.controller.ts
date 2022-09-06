@@ -15,7 +15,7 @@ import { TrashcansService } from './trashcans.service';
 import { CreateTrashcanDto } from './dto/create-trashcan.dto';
 import { UpdateTrashcanDto } from './dto/update-trashcan.dto';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { UserId } from 'src/auth/decorator/user-id.decorator';
+import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { TrashcanByIdPipe } from './pipe/trashcan-by-id.pipe';
 import { Trashcan } from './entities/trashcan.entity';
@@ -35,8 +35,8 @@ export class TrashcansController {
   }
 
   @Post()
-  async create(@UserId() userId: number, @Body() dto: CreateTrashcanDto) {
-    await this.trashcansService.create(userId, dto);
+  async create(@AccessUser() user, @Body() dto: CreateTrashcanDto) {
+    await this.trashcansService.create(user.id, dto);
     return { message: 'success' };
   }
 

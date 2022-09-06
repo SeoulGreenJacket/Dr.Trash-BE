@@ -8,7 +8,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { UserId } from 'src/auth/decorator/user-id.decorator';
+import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { Trashcan } from 'src/trashcans/entities/trashcan.entity';
 import { TrashcanByIdPipe } from 'src/trashcans/pipe/trashcan-by-id.pipe';
@@ -27,10 +27,10 @@ export class TrashController {
     type: Boolean,
   })
   async begin(
-    @UserId() userId,
+    @AccessUser() user,
     @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
   ): Promise<boolean> {
-    return await this.trashService.beginTrashcanUsage(userId, trashcan.id);
+    return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
   }
 
   @Post('end/:id')
@@ -39,10 +39,10 @@ export class TrashController {
     type: Boolean,
   })
   async end(
-    @UserId() userId,
+    @AccessUser() user,
     @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
   ): Promise<boolean> {
-    return await this.trashService.endTrashcanUsage(userId, trashcan.id);
+    return await this.trashService.endTrashcanUsage(user.id, trashcan.id);
   }
 
   @Get('summary')
@@ -51,10 +51,10 @@ export class TrashController {
     type: TrashSummary,
   })
   async summary(
-    @UserId() userId,
+    @AccessUser() user,
     @Query('year', ParseIntPipe) year,
     @Query('month', ParseIntPipe) month,
   ): Promise<TrashSummary> {
-    return await this.trashService.getUserTrashSummary(userId, year, month);
+    return await this.trashService.getUserTrashSummary(user.id, year, month);
   }
 }
