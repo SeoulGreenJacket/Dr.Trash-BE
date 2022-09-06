@@ -14,7 +14,6 @@ import {
   ParseIntPipe,
   Patch,
   Query,
-  Req,
   UseGuards,
   UsePipes,
   ValidationPipe,

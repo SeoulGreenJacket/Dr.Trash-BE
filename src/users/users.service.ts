@@ -43,12 +43,11 @@ export class UsersService {
     offset: number,
   ): Promise<UserRankResponseDto[]> {
     const userRanklist = await this.cacheService.getUserRankList(limit, offset);
-    console.log(userRanklist);
 
     return await Promise.all(
       userRanklist.map(async ({ score: point, value: userId }) => {
         const { name } = await this.usersRepository.findByUserId(userId);
-        return { point, userName: name };
+        return { userId, point, userName: name };
       }),
     );
   }
