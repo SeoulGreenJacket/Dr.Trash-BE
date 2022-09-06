@@ -16,7 +16,13 @@ export class UsersService {
   ) {}
 
   async create(kakaoId: bigint, thumbnail: string, name: string) {
-    return await this.usersRepository.create(name, thumbnail, kakaoId);
+    const user: User = await this.usersRepository.create(
+      name,
+      thumbnail,
+      kakaoId,
+    );
+    await this.cacheService.addUserPoint(user.id, user.point);
+    return user;
   }
 
   async findOne(id: number): Promise<UserResponseDto> {
@@ -43,12 +49,11 @@ export class UsersService {
     offset: number,
   ): Promise<UserRankResponseDto[]> {
     const userRanklist = await this.cacheService.getUserRankList(limit, offset);
-    console.log(userRanklist);
 
     return await Promise.all(
       userRanklist.map(async ({ score: point, value: userId }) => {
         const { name } = await this.usersRepository.findByUserId(userId);
-        return { point, userName: name };
+        return { userId, point, userName: name };
       }),
     );
   }
