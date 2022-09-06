@@ -1,9 +1,10 @@
-import { JwtPayload } from './../dto/jwt-token.dto';
+import { JwtPayload } from '../types/jwt-token-payload.type';
 import { User } from 'src/users/entities/user.entity';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersRepository } from 'src/users/users.repository';
+import { jwt } from 'src/common/environments';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -11,14 +12,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET,
+      secretOrKey: jwt.accessConfig.secret,
     });
   }
 
   async validate(payload: JwtPayload) {
     const user: User = await this.usersRepository.findByUserId(payload.userId);
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('user not found');
     }
     return user;
   }

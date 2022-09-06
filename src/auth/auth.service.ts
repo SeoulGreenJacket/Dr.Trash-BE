@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthRepository } from './auth.repository';
-import { JwtPayload, JwtTokenResponse } from './dto/jwt-token.dto';
+import { JwtPayload } from './types/jwt-token-payload.type';
 import { v4 as uuid4 } from 'uuid';
+import { JwtTokenResponseDto } from './dto/jwt-token-response.dto';
+import { jwt } from 'src/common/environments';
 
 @Injectable()
 export class AuthService {
@@ -11,12 +13,14 @@ export class AuthService {
     private authRepository: AuthRepository,
   ) {}
 
-  async login(userId: number): Promise<JwtTokenResponse> {
+  async login(userId: number): Promise<JwtTokenResponseDto> {
     const uuid = uuid4();
-    const payload: JwtPayload = { uuid, userId: userId };
+    const payload: JwtPayload = { uuid, userId };
     const accessToken = this.jwtService.sign(payload);
-    const expiresIn = parseInt(process.env.JWT_REFRESH_EXPIRES_IN);
-    const refreshToken = this.jwtService.sign(payload, { expiresIn });
+    const refreshToken = this.jwtService.sign(
+      payload,
+      jwt.refreshConfig.signOptions,
+    );
     await this.authRepository.createToken(uuid);
     return {
       accessToken,
@@ -28,7 +32,7 @@ export class AuthService {
     await this.authRepository.deleteToken(uuid);
   }
 
-  async refresh(uuid: string, userId: number): Promise<JwtTokenResponse> {
+  async refresh(uuid: string, userId: number): Promise<JwtTokenResponseDto> {
     await this.authRepository.deleteToken(uuid);
     return await this.login(userId);
   }

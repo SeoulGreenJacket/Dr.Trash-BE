@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { CacheModule } from './cache/cache.module';
 import { TrashcansModule } from './trashcans/trashcans.module';
+import { TrashModule } from './trash/trash.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { TrashcansModule } from './trashcans/trashcans.module';
       envFilePath: '.development.env',
     }),
     TrashcansModule,
+    TrashModule,
   ],
 })
 export class AppModule {}
