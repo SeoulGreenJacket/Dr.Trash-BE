@@ -4,9 +4,11 @@ import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { CacheModule } from './cache/cache.module';
+import { TrashcansModule } from './trashcans/trashcans.module';
+import { TrashModule } from './trash/trash.module';
 import { AchievementsModule } from './achievements/achievements.module';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AchievementInterceptor } from './achievements/achievement.interceptor';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -14,11 +16,13 @@ import { AchievementInterceptor } from './achievements/achievement.interceptor';
     CacheModule,
     DatabaseModule,
     UsersModule,
+    TrashcansModule,
+    TrashModule,
+    AchievementsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.development.env',
     }),
-    AchievementsModule,
   ],
   providers: [
     {

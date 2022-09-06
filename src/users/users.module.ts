@@ -1,3 +1,4 @@
+import { CacheModule } from './../cache/cache.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
@@ -11,6 +12,7 @@ import { UsersRepository } from './users.repository';
       return AuthModule;
     }),
     DatabaseModule,
+    CacheModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository],

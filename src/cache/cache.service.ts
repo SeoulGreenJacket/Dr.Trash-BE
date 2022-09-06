@@ -19,63 +19,90 @@ export class CacheService {
     }>(`
       SELECT "id", "point" FROM ${database.tables.user};
     `);
-    usersPoint.map(({ id, point }) => {
-      this.client.zAdd(redis.keys.userPoint, {
-        score: point,
-        value: id.toString(),
-      });
-    });
+    try {
+      await Promise.all(
+        usersPoint.map(({ id, point }) => {
+          return this.client.zAdd('user-point', {
+            score: point,
+            value: id.toString(),
+          });
+        }),
+      );
+    } catch (error) {
+      console.log('migrate to redis failed: ', error);
+    }
   }
 
   async migrateUsersTrash() {
     const usersTrash = await this.databaseService.query<{
-      userId: number;
-      trashType: string;
-      isCorrect: boolean;
+      userId: string;
+      type: string;
+      at: Date;
+      ok: string;
     }>(`
-      SELECT "userId", "type", "ok" FROM ${database.tables.trash};
+      SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash};
     `);
-    usersTrash.map(({ userId, trashType, isCorrect }) => {
-      const key = `user-trash:${userId}`;
-      const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
-      this.client.hIncrBy(key, field, 1);
+    return Promise.all(
+      usersTrash.map(({ userId, type, at, ok }) => {
+        const key = `user-trash:${userId}-${at.getUTCFullYear()}-${at.getUTCMonth()}`;
+        const field = `${type}-${ok ? 'success' : 'failure'}`;
+        return this.client.hIncrBy(key, field, 1);
+      }),
+    );
+  }
+
+  async addUserPoint(userId: number, point: number) {
+    await this.client.zAdd('user-point', {
+      score: point,
+      value: userId.toString(),
     });
   }
 
   async getUserRank(userId: number): Promise<number> {
-    return await this.client.zRevRank(redis.keys.userPoint, userId.toString());
+    return (await this.client.zRevRank('user-point', userId.toString())) + 1;
   }
 
-  async getUserRankList(offset: number, limit: number): Promise<number[]> {
-    const userRankList = await this.client.zRange(
-      redis.keys.userPoint,
+  async getUserRankList(
+    limit: number,
+    offset: number,
+  ): Promise<{ score: number; value: number }[]> {
+    const userRankList = await this.client.zRangeWithScores(
+      'user-point',
       offset,
       offset + limit - 1,
       {
         REV: true,
       },
     );
-    return userRankList.map((userId) => {
-      return +userId;
+    return userRankList.map(({ score, value }) => {
+      return { score, value: parseInt(value) };
     });
   }
 
-  async getUserTrash(userId: number) {
-    const userTrash = await this.client.hGetAll(
-      `${redis.keys.userTrash}:${userId}`,
+  async getUserTrashSummary(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<TrashSummary> {
+    const userTrashSummary = await this.client.hGetAll(
+      `user-trash:${userId}-${year}-${month}`,
     );
     return {
-      plastic: {
-        success: +userTrash['plastic-success'],
-        failure: +userTrash['plastic-failure'],
+      can: {
+        success: +(userTrashSummary['can-success'] ?? 0),
+        failure: +(userTrashSummary['can-failure'] ?? 0),
+      },
+      pet: {
+        success: +(userTrashSummary['pet-success'] ?? 0),
+        failure: +(userTrashSummary['pet-failure'] ?? 0),
       },
       paper: {
-        success: +userTrash['paper-success'],
-        failure: +userTrash['paper-failure'],
+        success: +(userTrashSummary['paper-success'] ?? 0),
+        failure: +(userTrashSummary['paper-failure'] ?? 0),
       },
-      can: {
-        success: +userTrash['can-success'],
-        failure: +userTrash['can-failure'],
+      plastic: {
+        success: +(userTrashSummary['plastic-success'] ?? 0),
+        failure: +(userTrashSummary['plastic-failure'] ?? 0),
       },
     };
   }
@@ -91,13 +118,14 @@ export class CacheService {
       }),
     );
   }
-
+  
   async updateUserPoint(userId: number, change: number) {
-    await this.client.zIncrBy(redis.keys.userPoint, change, userId.toString());
+    await this.client.zIncrBy('user-point', change, userId.toString());
   }
 
   async updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
-    const key = `${redis.keys.userTrash}:${userId}`;
+    const today = new Date();
+    const key = `user-trash:${userId}-${today.getUTCFullYear()}-${today.getUTCMonth()}`;
     const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
     await this.client.hIncrBy(key, field, 1);
   }

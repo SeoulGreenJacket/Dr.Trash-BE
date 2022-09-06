@@ -13,6 +13,8 @@ export const database = {
     trashcan: `"${process.env.DATABASE_SCHEMA}"."trashcan"`,
     achievement: `"${process.env.DATABASE_SCHEMA}"."achievement"`,
     achiever: `"${process.env.DATABASE_SCHEMA}"."achiever"`,
+    trashcanUsage: `"${process.env.DATABASE_SCHEMA}"."trashcanUsage"`,
+    trashcanCode: `"${process.env.DATABASE_SCHEMA}"."trashcanCode"`,
   },
 };
 
