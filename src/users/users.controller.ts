@@ -20,6 +20,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
+import { UserId } from 'src/auth/decorator/user-id.decorator';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('User')
@@ -29,8 +30,8 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Get()
-  async findMe(@Req() req): Promise<any> {
-    return req.user.id;
+  async findMe(@UserId() id: number): Promise<any> {
+    return id;
   }
 
   @ApiBearerAuth()
