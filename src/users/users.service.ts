@@ -16,7 +16,13 @@ export class UsersService {
   ) {}
 
   async create(kakaoId: bigint, thumbnail: string, name: string) {
-    return await this.usersRepository.create(name, thumbnail, kakaoId);
+    const user: User = await this.usersRepository.create(
+      name,
+      thumbnail,
+      kakaoId,
+    );
+    await this.cacheService.addUserPoint(user.id, user.point);
+    return user;
   }
 
   async findOne(id: number): Promise<UserResponseDto> {
