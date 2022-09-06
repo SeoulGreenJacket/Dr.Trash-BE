@@ -1,12 +1,18 @@
-import { Module, OnApplicationShutdown } from '@nestjs/common';
+import { forwardRef, Module, OnApplicationShutdown } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { createClient } from 'redis';
+import { AchievementsModule } from 'src/achievements/achievements.module';
 import { redis } from 'src/common/environments';
 import { DatabaseModule } from 'src/database/database.module';
 import { CacheService } from './cache.service';
 
 @Module({
-  imports: [DatabaseModule],
+  imports: [
+    DatabaseModule,
+    forwardRef(() => {
+      return AchievementsModule;
+    }),
+  ],
   providers: [
     CacheService,
     {
