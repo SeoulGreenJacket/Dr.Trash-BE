@@ -21,20 +21,19 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get()
   async findMe(@Req() req): Promise<any> {
     return req.user.id;
   }
 
   @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   @Get('rank')
   async findRankAll(
     @Query('limit', ParseIntPipe, new DefaultValuePipe(10)) limit: number,
@@ -45,7 +44,6 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
-  @UseGuards(JwtAuthGuard)
   @Get(':id')
   async findOne(
     @Param('id', ParseIntPipe) id: number,
@@ -63,7 +61,6 @@ export class UsersController {
   )
   @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -75,7 +72,6 @@ export class UsersController {
 
   @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number): Promise<number> {
     return await this.usersService.delete(id);
