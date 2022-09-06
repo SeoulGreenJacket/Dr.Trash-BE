@@ -1,3 +1,4 @@
+import { User } from 'src/users/entities/user.entity';
 import { UserRankResponseDto } from 'src/users/dto/user-rank-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { CheckUserIdGuard } from './guard/check-user-id.guard';
@@ -20,7 +21,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { UserId } from 'src/auth/decorator/user-id.decorator';
+import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('User')
@@ -30,8 +31,8 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Get()
-  async findMe(@UserId() id: number): Promise<any> {
-    return id;
+  async findMe(@AccessUser() user: User): Promise<any> {
+    return user.id;
   }
 
   @ApiBearerAuth()
@@ -66,9 +67,9 @@ export class UsersController {
   async update(
     @Param('id') id: number,
     @Body() userUpdateDto: UserUpdateDto,
-    @Req() req,
+    @AccessUser() user: User,
   ): Promise<any> {
-    return await this.usersService.update(userUpdateDto, req.user);
+    return await this.usersService.update(userUpdateDto, user);
   }
 
   @ApiBearerAuth()
