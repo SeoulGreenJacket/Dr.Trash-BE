@@ -1,15 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType as Client } from 'redis';
-import { AchievementsRepository } from 'src/achievements/achievements.repository';
-import { database, redis } from 'src/common/environments';
+import { database } from 'src/common/environments';
 import { DatabaseService } from 'src/database/database.service';
+import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
 
 @Injectable()
 export class CacheService {
   constructor(
     @Inject('REDIS_CLIENT') private client: Client,
     private readonly databaseService: DatabaseService,
-    private readonly achievementsRepository: AchievementsRepository,
   ) {}
 
   async migrateUsersPoint() {
@@ -19,6 +18,7 @@ export class CacheService {
     }>(`
       SELECT "id", "point" FROM ${database.tables.user};
     `);
+
     try {
       await Promise.all(
         usersPoint.map(({ id, point }) => {
@@ -107,33 +107,14 @@ export class CacheService {
     };
   }
 
-  async getAchievementNotifications(userId: number) {
-    const achievementIds = await this.client.sMembers(
-      `${redis.keys.achievementNotification}:${userId}`,
-    );
-    await this.client.del(`${redis.keys.achievementNotification}:${userId}`);
-    return Promise.all(
-      achievementIds.map((id) => {
-        return this.achievementsRepository.getAchievement(+id);
-      }),
-    );
-  }
-  
   async updateUserPoint(userId: number, change: number) {
     await this.client.zIncrBy('user-point', change, userId.toString());
   }
 
-  async updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
+  updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
     const today = new Date();
     const key = `user-trash:${userId}-${today.getUTCFullYear()}-${today.getUTCMonth()}`;
     const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
-    await this.client.hIncrBy(key, field, 1);
-  }
-
-  async updateAchievementNotification(userId: number, achievementId: number) {
-    await this.client.sAdd(
-      `${redis.keys.achievementNotification}:${userId}`,
-      achievementId.toString(),
-    );
+    this.client.hIncrBy(key, field, 1);
   }
 }
