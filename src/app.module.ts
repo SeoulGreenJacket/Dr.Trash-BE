@@ -6,9 +6,6 @@ import { DatabaseModule } from './database/database.module';
 import { CacheModule } from './cache/cache.module';
 import { TrashcansModule } from './trashcans/trashcans.module';
 import { TrashModule } from './trash/trash.module';
-import { AchievementsModule } from './achievements/achievements.module';
-import { AchievementInterceptor } from './achievements/achievement.interceptor';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -16,19 +13,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     CacheModule,
     DatabaseModule,
     UsersModule,
-    TrashcansModule,
-    TrashModule,
-    AchievementsModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.development.env',
     }),
-  ],
-  providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: AchievementInterceptor,
-    },
+    TrashcansModule,
+    TrashModule,
   ],
 })
 export class AppModule {}
