@@ -35,6 +35,12 @@ export class UsersController {
   }
 
   @ApiBearerAuth()
+  @Get('count')
+  async countUserTrash(@AccessUser() user: User): Promise<number> {
+    return await this.usersService.countUserTrash(user.id);
+  }
+
+  @ApiBearerAuth()
   @Get('rank')
   async findRankAll(
     @Query('limit', ParseIntPipe, new DefaultValuePipe(10)) limit: number,
