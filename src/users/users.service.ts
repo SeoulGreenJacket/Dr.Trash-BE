@@ -70,4 +70,8 @@ export class UsersService {
   async delete(id: number) {
     return await this.usersRepository.delete(id);
   }
+
+  async countUserTrash(id: number) {
+    return await this.usersRepository.countUserTrash(id);
+  }
 }

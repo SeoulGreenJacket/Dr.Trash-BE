@@ -58,4 +58,13 @@ export class UsersRepository {
     );
     return result.length === 1 ? result[0].id : null;
   }
+
+  async countUserTrash(id: number): Promise<number> {
+    const result = await this.databaseService.query<{ count: number }>(
+      `SELECT COUNT(*) FROM ${database.tables.trashcanUsage}
+        WHERE "userId"=${id} 
+        AND open="TRUE";`,
+    );
+    return result.length === 1 ? result[0].count : null;
+  }
 }
