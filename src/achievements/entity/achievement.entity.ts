@@ -3,5 +3,4 @@ export class Achievement {
   name: string;
   description: string;
   imageUri: string;
-  achievedAt: Date;
 }
