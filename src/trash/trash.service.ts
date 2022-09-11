@@ -18,6 +18,11 @@ export class TrashService {
     userId: number,
     trashcanId: number,
   ): Promise<number> {
+    const type = ['pet', 'plastic'];
+    for (let i = 0; i < 2; i++) {
+      this.trashRepository.testInsert(userId, trashcanId, type[i], true);
+      this.trashRepository.testInsert(userId, trashcanId, type[i], false);
+    }
     return await this.trashRepository.createTrashcanUsage(userId, trashcanId);
   }
 

@@ -49,4 +49,24 @@ export class TrashRepository {
 
     return queryResult.length === 1 ? queryResult[0] : null;
   }
+
+  async testInsert(userId, trashcanId, type, ok) {
+    await this.databaseService.query(`
+      INSERT INTO
+        ${database.tables.trashcan}
+        (
+          "userId",
+          "trashcanId",
+          "type",
+          "ok",
+        )
+      VALUES
+        (
+          ${userId},
+          ${trashcanId},
+          '${type}',
+          ok,
+        )
+    ;`);
+  }
 }
