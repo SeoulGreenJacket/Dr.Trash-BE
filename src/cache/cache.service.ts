@@ -172,12 +172,14 @@ export class CacheService {
       }),
     );
 
-    const userTrashLogsInOneUsage = this.client.hKeys(
+    const userTrashLogsInOneUsage = await this.client.hGetAll(
       `user-trash:${userId}-${open}`,
     );
+
     const type = Object.keys(userTrashLogsInOneUsage)[0]?.split('-')[0];
     const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
     const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
+
     return {
       Date: open,
       type,

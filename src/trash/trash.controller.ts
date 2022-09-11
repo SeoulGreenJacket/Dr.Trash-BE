@@ -7,7 +7,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { Trashcan } from 'src/trashcans/entities/trashcan.entity';
@@ -18,6 +18,7 @@ import { TrashService } from './trash.service';
 @ApiTags('Trash')
 @Controller('trash')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TrashController {
   constructor(private readonly trashService: TrashService) {}
 
@@ -28,9 +29,9 @@ export class TrashController {
   })
   async begin(
     @AccessUser() user,
-    @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
+    //@Param('id', TrashcanByIdPipe) trashcan: Trashcan,
   ): Promise<number> {
-    return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
+    return await this.trashService.beginTrashcanUsage(user.id, 1);
   }
 
   @Post('end/:id')
@@ -40,7 +41,6 @@ export class TrashController {
   })
   async end(
     @AccessUser() user,
-    @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
     @Query('usageId', ParseIntPipe) usageId: number,
   ) {
     return await this.trashService.endTrashcanUsage(usageId);
