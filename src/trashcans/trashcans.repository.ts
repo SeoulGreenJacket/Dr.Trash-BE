@@ -3,12 +3,12 @@ import { DatabaseService } from 'src/database/database.service';
 import { CreateTrashcanDto } from './dto/create-trashcan.dto';
 import { UpdateTrashcanDto } from './dto/update-trashcan.dto';
 import { Trashcan } from './entities/trashcan.entity';
+import { database } from 'src/common/environments';
 
 @Injectable()
 export class TrashcansRepository {
-  private readonly schema = process.env.DATABASE_APPLICATION_SCHEMA;
-  private readonly trashcanTable = `${this.schema}.trashcan`;
-  private readonly trashcanCodeTable = `"${this.schema}"."trashcanCode"`;
+  private readonly trashcanTable = database.tables.trashcan;
+  private readonly trashcanCodeTable = database.tables.trashcanCode;
 
   constructor(private readonly databaseService: DatabaseService) {}
 
