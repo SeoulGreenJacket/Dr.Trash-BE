@@ -1,3 +1,4 @@
+import { UsersModule } from 'src/users/users.module';
 import { Module } from '@nestjs/common';
 import { TrashController } from './trash.controller';
 import { TrashRepository } from './trash.repository';
@@ -7,7 +8,7 @@ import { TrashcansModule } from 'src/trashcans/trashcans.module';
 import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [CacheModule, TrashcansModule, DatabaseModule],
+  imports: [CacheModule, TrashcansModule, DatabaseModule, UsersModule],
   controllers: [TrashController],
   providers: [TrashService, TrashRepository],
 })
