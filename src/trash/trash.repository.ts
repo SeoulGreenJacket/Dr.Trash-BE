@@ -6,12 +6,11 @@ import { Injectable } from '@nestjs/common';
 export class TrashRepository {
   constructor(private databaseService: DatabaseService) {}
 
-  async logTrashcanUsage(
+  async createTrashcanUsage(
     userId: number,
     trashcanId: number,
-    open: boolean,
-  ): Promise<boolean> {
-    const queryResult = await this.databaseService.query<{ id: string }>(`
+  ): Promise<number> {
+    const queryResult = await this.databaseService.query<{ id: number }>(`
       INSERT INTO
         ${database.tables.trashcanUsage}
         (
@@ -23,12 +22,31 @@ export class TrashRepository {
         (
           ${userId},
           ${trashcanId},
-          ${open}
+          now()
         )
       RETURNING
         id
     ;`);
 
-    return queryResult.length === 1;
+    return queryResult.length === 1 ? +queryResult[0].id : null;
+  }
+
+  async updateTrashcanUsage(usageId: number) {
+    const queryResult = await this.databaseService.query<{
+      userId: number;
+      open: Date;
+      close: Date;
+    }>(`
+      UPDATE
+        ${database.tables.trashcanUsage}
+      SET
+        "close" = now()
+      WHERE
+        id = ${usageId}
+      RETURNING
+        "userId","open","close"
+    ;`);
+
+    return queryResult.length === 1 ? queryResult[0] : null;
   }
 }

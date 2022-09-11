@@ -29,7 +29,7 @@ export class TrashController {
   async begin(
     @AccessUser() user,
     @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
-  ): Promise<boolean> {
+  ): Promise<number> {
     return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
   }
 
@@ -41,8 +41,9 @@ export class TrashController {
   async end(
     @AccessUser() user,
     @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
-  ): Promise<boolean> {
-    return await this.trashService.endTrashcanUsage(user.id, trashcan.id);
+    @Query('usageId', ParseIntPipe) usageId: number,
+  ) {
+    return await this.trashService.endTrashcanUsage(usageId);
   }
 
   @Get('summary')
@@ -50,11 +51,20 @@ export class TrashController {
     description: 'Get trash summary',
     type: TrashSummary,
   })
-  async summary(
+  async summary(@AccessUser() user): Promise<TrashSummary> {
+    return await this.trashService.getUserTrashSummaryAll(user.id);
+  }
+
+  @Get('summary-monthly')
+  @ApiOkResponse({
+    description: 'Get trash summary',
+    type: TrashSummary,
+  })
+  async summaryMonthly(
     @AccessUser() user,
-    @Query('year', ParseIntPipe) year,
-    @Query('month', ParseIntPipe) month,
+    @Query('year', ParseIntPipe) year: number,
+    @Query('month', ParseIntPipe) month: number,
   ): Promise<TrashSummary> {
-    return await this.trashService.getUserTrashSummary(user.id, year, month);
+    return await this.trashService.getUserTrashSummaryInMonth(1, year, month);
   }
 }

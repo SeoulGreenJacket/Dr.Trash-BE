@@ -13,27 +13,29 @@ export class TrashService {
   async beginTrashcanUsage(
     userId: number,
     trashcanId: number,
-  ): Promise<boolean> {
-    return await this.trashRepository.logTrashcanUsage(
-      userId,
-      trashcanId,
-      true,
-    );
+  ): Promise<number> {
+    return await this.trashRepository.createTrashcanUsage(userId, trashcanId);
   }
 
-  async endTrashcanUsage(userId: number, trashcanId: number): Promise<boolean> {
-    return await this.trashRepository.logTrashcanUsage(
-      userId,
-      trashcanId,
-      false,
-    );
+  async endTrashcanUsage(usageId: number) {
+    const { userId, open, close } =
+      await this.trashRepository.updateTrashcanUsage(usageId);
+    await this.cacheService.addUserUsageTrialTrash(userId, open, close);
   }
 
-  async getUserTrashSummary(
+  async getUserTrashSummaryAll(userId: number): Promise<TrashSummary> {
+    return await this.cacheService.getUserTrashSummary(userId);
+  }
+
+  async getUserTrashSummaryInMonth(
     userId: number,
     year: number,
     month: number,
   ): Promise<TrashSummary> {
-    return await this.cacheService.getUserTrashSummary(userId, year, month);
+    return await this.cacheService.getUserTrashMonthlySummary(
+      userId,
+      year,
+      month,
+    );
   }
 }

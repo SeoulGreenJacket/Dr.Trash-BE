@@ -3,6 +3,8 @@ import { RedisClientType as Client } from 'redis';
 import { database } from 'src/common/environments';
 import { DatabaseService } from 'src/database/database.service';
 import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 
 @Injectable()
 export class CacheService {
@@ -33,7 +35,7 @@ export class CacheService {
     }
   }
 
-  async migrateUsersTrash() {
+  async migrateUsersAllTrash() {
     const usersTrash = await this.databaseService.query<{
       userId: string;
       type: string;
@@ -43,8 +45,128 @@ export class CacheService {
       SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash};
     `);
     return Promise.all(
-      usersTrash.map(({ userId, type, at, ok }) => {
-        const key = `user-trash:${userId}-${at.getUTCFullYear()}-${at.getUTCMonth()}`;
+      usersTrash.map(({ userId, type, ok }) => {
+        const key = `user-trash:${userId}`;
+        const field = `${type}-${ok ? 'success' : 'failure'}`;
+        return this.client.hIncrBy(key, field, 1);
+      }),
+    );
+  }
+
+  async migrateUsersUsageTrialTrash() {
+    const usersTrashUsage = await this.databaseService.query<{
+      userId: string;
+      trashcanId: string;
+      open: Date;
+      close: Date;
+    }>(
+      `SELECT "userId", "trashcanId", "open", "close" FROM ${database.tables.trashcanUsage};`,
+    );
+
+    try {
+      await Promise.all(
+        usersTrashUsage.map(({ userId, open }) => {
+          const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
+            locale: ko,
+          });
+          const key = `user-trash:${userId}-${open.getFullYear()}-${open.getMonth()}`;
+          return this.client.rPush(key, openString);
+        }),
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
+    const usersTrashLogsInTrial = (
+      await Promise.all(
+        usersTrashUsage.map(({ userId, open, close }) => {
+          const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
+            locale: ko,
+          });
+          const closeString = format(close, 'yyyy-MM-dd HH:mm:ss.SSS', {
+            locale: ko,
+          });
+          return this.databaseService.query<{
+            userId: string;
+            type: string;
+            at: Date;
+            ok: string;
+          }>(
+            `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash} 
+              WHERE "userId" = ${userId} 
+              AND "at" BETWEEN '${openString}' AND '${closeString}';`,
+          );
+        }),
+      )
+    ).map((trashLogs, index) => {
+      return {
+        userId: usersTrashUsage[index].userId,
+        open: usersTrashUsage[index].open.toISOString(),
+        trashLogs,
+      };
+    });
+
+    await Promise.all(
+      usersTrashLogsInTrial.map(({ userId, open, trashLogs }) => {
+        return Promise.all(
+          trashLogs.map(({ type, ok }) => {
+            const key = `user-trash:${userId}-${open}`;
+            const field = `${type}-${ok ? 'success' : 'failure'}`;
+            return this.client.hIncrBy(key, field, 1);
+          }),
+        );
+      }),
+    );
+  }
+
+  async getUserTrashMonthlySummary(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<any> {
+    const userTrashUsagesInMonth = await this.client.lRange(
+      `user-trash:${userId}-${year}-${month}`,
+      0,
+      -1,
+    );
+    const userTrashLogsInMonth = (
+      await Promise.all(
+        userTrashUsagesInMonth.map((open) => {
+          return this.client.hGetAll(`user-trash:${userId}-${open}`);
+        }),
+      )
+    ).map((userTrashLogsInOneUsage, index) => {
+      const type = Object.keys(userTrashLogsInOneUsage)[0]?.split('-')[0];
+      const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
+      const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
+      return {
+        Date: Date.parse(userTrashUsagesInMonth[index]),
+        type,
+        success,
+        failure,
+      };
+    });
+    return userTrashLogsInMonth;
+  }
+
+  async addUserUsageTrialTrash(userId, open, close) {
+    const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
+    const closeString = format(close, 'yyyy-MM-dd HH:mm:ss.SSS', {
+      locale: ko,
+    });
+    const trashLogs = await this.databaseService.query<{
+      userId: string;
+      type: string;
+      at: Date;
+      ok: string;
+    }>(
+      `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash} 
+          WHERE "userId" = ${userId} 
+          AND "at" BETWEEN '${openString}' AND '${closeString}';`,
+    );
+    await Promise.all(
+      trashLogs.map(({ type, ok }) => {
+        const key = `user-trash:${userId}-${open}`;
         const field = `${type}-${ok ? 'success' : 'failure'}`;
         return this.client.hIncrBy(key, field, 1);
       }),
@@ -79,14 +201,8 @@ export class CacheService {
     });
   }
 
-  async getUserTrashSummary(
-    userId: number,
-    year: number,
-    month: number,
-  ): Promise<TrashSummary> {
-    const userTrashSummary = await this.client.hGetAll(
-      `user-trash:${userId}-${year}-${month}`,
-    );
+  async getUserTrashSummary(userId: number): Promise<TrashSummary> {
+    const userTrashSummary = await this.client.hGetAll(`user-trash:${userId}`);
     return {
       can: {
         success: +(userTrashSummary['can-success'] ?? 0),
