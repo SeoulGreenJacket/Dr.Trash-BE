@@ -157,6 +157,10 @@ export class CacheService {
     const [openString, closeString] = [open, close].map((date) => {
       return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
     });
+    await this.client.rPush(
+      `user-trash:${userId}-${open.getFullYear()}-${open.getMonth() + 1}`,
+      openString,
+    );
     const trashLogs = await this.databaseService.query<{
       userId: string;
       type: string;
@@ -172,7 +176,7 @@ export class CacheService {
       failure = 0;
     await Promise.all(
       trashLogs.map(({ type: trashType, ok }) => {
-        const key = `user-trash:${userId}-${open}`;
+        const key = `user-trash:${userId}-${openString}`;
         const field = `${trashType}-${ok ? 'success' : 'failure'}`;
         type = trashType;
         ok ? success++ : failure++;
