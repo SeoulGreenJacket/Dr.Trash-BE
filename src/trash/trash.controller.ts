@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -46,25 +47,23 @@ export class TrashController {
     return await this.trashService.endTrashcanUsage(usageId);
   }
 
-  @Get('summary')
-  @ApiOkResponse({
-    description: 'Get trash summary',
-    type: TrashSummary,
-  })
-  async summary(@AccessUser() user): Promise<TrashSummary> {
-    return await this.trashService.getUserTrashSummaryAll(user.id);
-  }
-
-  @Get('summary-monthly')
+  @Get('summary/:kind')
   @ApiOkResponse({
     description: 'Get trash summary',
     type: TrashSummary,
   })
   async summaryMonthly(
     @AccessUser() user,
+    @Param('kind') kind: string,
     @Query('year', ParseIntPipe) year: number,
     @Query('month', ParseIntPipe) month: number,
-  ): Promise<TrashSummary> {
-    return await this.trashService.getUserTrashSummaryInMonth(1, year, month);
+  ) {
+    if (kind === 'all') {
+      return await this.trashService.getUserTrashSummaryAll(1);
+    } else if (kind === 'detail') {
+      return await this.trashService.getUserTrashSummaryInMonth(1, year, month);
+    } else {
+      throw new NotFoundException();
+    }
   }
 }

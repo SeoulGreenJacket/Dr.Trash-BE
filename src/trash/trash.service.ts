@@ -31,7 +31,7 @@ export class TrashService {
     userId: number,
     year: number,
     month: number,
-  ): Promise<TrashSummary> {
+  ) {
     return await this.cacheService.getUserTrashMonthlySummary(
       userId,
       year,

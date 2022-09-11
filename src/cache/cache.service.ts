@@ -13,6 +13,10 @@ export class CacheService {
     private readonly databaseService: DatabaseService,
   ) {}
 
+  async flushAll() {
+    await this.client.flushAll();
+  }
+
   async migrateUsersPoint() {
     const usersPoint = await this.databaseService.query<{
       id: number;
@@ -69,7 +73,9 @@ export class CacheService {
           const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
             locale: ko,
           });
-          const key = `user-trash:${userId}-${open.getFullYear()}-${open.getMonth()}`;
+          const key = `user-trash:${userId}-${open.getFullYear()}-${
+            open.getMonth() + 1
+          }`;
           return this.client.rPush(key, openString);
         }),
       );
@@ -101,7 +107,9 @@ export class CacheService {
     ).map((trashLogs, index) => {
       return {
         userId: usersTrashUsage[index].userId,
-        open: usersTrashUsage[index].open.toISOString(),
+        open: format(usersTrashUsage[index].open, 'yyyy-MM-dd HH:mm:ss.SSS', {
+          locale: ko,
+        }),
         trashLogs,
       };
     });
@@ -129,6 +137,7 @@ export class CacheService {
       0,
       -1,
     );
+
     const userTrashLogsInMonth = (
       await Promise.all(
         userTrashUsagesInMonth.map((open) => {
@@ -140,7 +149,7 @@ export class CacheService {
       const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
       const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
       return {
-        Date: Date.parse(userTrashUsagesInMonth[index]),
+        Date: new Date(userTrashUsagesInMonth[index]),
         type,
         success,
         failure,
