@@ -1,17 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType as Client } from 'redis';
-import { database } from 'src/common/environments';
+import { database, redis } from 'src/common/environments';
 import { DatabaseService } from 'src/database/database.service';
 import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { OneTrialTrashSummary } from 'src/trash/dto/one-trial-trash-summary.dto';
+import { AchievementsRepository } from 'src/achievements/achievements.repository';
 
 @Injectable()
 export class CacheService {
   constructor(
     @Inject('REDIS_CLIENT') private client: Client,
     private readonly databaseService: DatabaseService,
+    private readonly achievementsRepository: AchievementsRepository,
   ) {}
 
   async flushAll() {
@@ -249,5 +251,24 @@ export class CacheService {
 
   async updateUserPoint(userId: number, change: number) {
     await this.client.zIncrBy('user-point', change, userId.toString());
+  }
+
+  async updateAchievementNotification(userId: number, achievementId: number) {
+    await this.client.sAdd(
+      `${redis.keys.achievementNotification}:${userId}`,
+      achievementId.toString(),
+    );
+  }
+
+  async getAchievementNotifications(userId: number) {
+    const achievementIds = await this.client.sMembers(
+      `${redis.keys.achievementNotification}:${userId}`,
+    );
+    await this.client.del(`${redis.keys.achievementNotification}:${userId}`);
+    return Promise.all(
+      achievementIds.map((id) => {
+        return this.achievementsRepository.getAchievement(+id);
+      }),
+    );
   }
 }
