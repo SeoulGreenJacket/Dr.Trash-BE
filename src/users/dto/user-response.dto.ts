@@ -6,7 +6,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Achievement } from '../entities/achievement.entity';
+import { UserAchievement } from 'src/achievements/entity/user-achievement.entity';
 import { Grade } from '../types/grade.enum';
 
 export class UserResponseDto {
@@ -33,9 +33,9 @@ export class UserResponseDto {
   @IsNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => {
-    return Achievement;
+    return UserAchievement;
   })
-  achievement: Achievement[];
+  achievement: UserAchievement[];
 
   @IsNotEmpty()
   @IsNumber()
