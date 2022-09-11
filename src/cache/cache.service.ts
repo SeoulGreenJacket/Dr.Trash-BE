@@ -171,6 +171,19 @@ export class CacheService {
         return this.client.hIncrBy(key, field, 1);
       }),
     );
+
+    const userTrashLogsInOneUsage = this.client.hKeys(
+      `user-trash:${userId}-${open}`,
+    );
+    const type = Object.keys(userTrashLogsInOneUsage)[0]?.split('-')[0];
+    const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
+    const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
+    return {
+      Date: open,
+      type,
+      success,
+      failure,
+    };
   }
 
   async addUserPoint(userId: number, point: number) {
