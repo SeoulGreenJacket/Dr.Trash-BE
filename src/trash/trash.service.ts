@@ -1,3 +1,4 @@
+import { UsersRepository } from 'src/users/users.repository';
 import { Injectable } from '@nestjs/common';
 import { CacheService } from 'src/cache/cache.service';
 import { TrashSummary } from './dto/trash-summary.dto';
@@ -8,6 +9,7 @@ export class TrashService {
   constructor(
     private readonly trashRepository: TrashRepository,
     private readonly cacheService: CacheService,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async beginTrashcanUsage(
@@ -20,7 +22,16 @@ export class TrashService {
   async endTrashcanUsage(usageId: number) {
     const { userId, open, close } =
       await this.trashRepository.updateTrashcanUsage(usageId);
-    return this.cacheService.addUserUsageTrialTrash(userId, open, close);
+    const UserUsageTrialTrash = this.cacheService.addUserUsageTrialTrash(
+      userId,
+      open,
+      close,
+    );
+    const totalPoint = await (
+      await this.usersRepository.findByUserId(userId)
+    ).point;
+
+    return { ...UserUsageTrialTrash, totalPoint };
   }
 
   async getUserTrashSummaryAll(userId: number): Promise<TrashSummary> {
