@@ -5,6 +5,7 @@ import { DatabaseService } from 'src/database/database.service';
 import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { OneTrialTrashSummary } from 'src/trash/dto/one-trial-trash-summary.dto';
 
 @Injectable()
 export class CacheService {
@@ -59,38 +60,29 @@ export class CacheService {
 
   async migrateUsersUsageTrialTrash() {
     const usersTrashUsage = await this.databaseService.query<{
-      userId: string;
+      userId: number;
       trashcanId: string;
       open: Date;
       close: Date;
     }>(
       `SELECT "userId", "trashcanId", "open", "close" FROM ${database.tables.trashcanUsage};`,
     );
-
-    try {
-      await Promise.all(
-        usersTrashUsage.map(({ userId, open }) => {
-          const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
-            locale: ko,
-          });
-          const key = `user-trash:${userId}-${open.getFullYear()}-${
-            open.getMonth() + 1
-          }`;
-          return this.client.rPush(key, openString);
-        }),
-      );
-    } catch (error) {
-      console.log(error);
-    }
-
+    await Promise.all(
+      usersTrashUsage.map(({ userId, open }) => {
+        const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
+          locale: ko,
+        });
+        const key = `user-trash:${userId}-${open.getFullYear()}-${
+          open.getMonth() + 1
+        }`;
+        return this.client.rPush(key, openString);
+      }),
+    );
     const usersTrashLogsInTrial = (
       await Promise.all(
         usersTrashUsage.map(({ userId, open, close }) => {
-          const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
-            locale: ko,
-          });
-          const closeString = format(close, 'yyyy-MM-dd HH:mm:ss.SSS', {
-            locale: ko,
+          const [openString, closeString] = [open, close].map((date) => {
+            return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
           });
           return this.databaseService.query<{
             userId: string;
@@ -99,8 +91,8 @@ export class CacheService {
             ok: string;
           }>(
             `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash} 
-              WHERE "userId" = ${userId} 
-              AND "at" BETWEEN '${openString}' AND '${closeString}';`,
+                WHERE "userId" = ${userId} 
+                AND "at" BETWEEN '${openString}' AND '${closeString}';`,
           );
         }),
       )
@@ -131,14 +123,14 @@ export class CacheService {
     userId: number,
     year: number,
     month: number,
-  ): Promise<any> {
+  ): Promise<OneTrialTrashSummary[]> {
     const userTrashUsagesInMonth = await this.client.lRange(
       `user-trash:${userId}-${year}-${month}`,
       0,
       -1,
     );
 
-    const userTrashLogsInMonth = (
+    return (
       await Promise.all(
         userTrashUsagesInMonth.map((open) => {
           return this.client.hGetAll(`user-trash:${userId}-${open}`);
@@ -149,19 +141,21 @@ export class CacheService {
       const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
       const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
       return {
-        Date: new Date(userTrashUsagesInMonth[index]),
+        date: new Date(userTrashUsagesInMonth[index]),
         type,
         success,
         failure,
       };
     });
-    return userTrashLogsInMonth;
   }
 
-  async addUserUsageTrialTrash(userId, open, close) {
-    const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
-    const closeString = format(close, 'yyyy-MM-dd HH:mm:ss.SSS', {
-      locale: ko,
+  async addUserUsageTrialTrash(
+    userId: number,
+    open: Date,
+    close: Date,
+  ): Promise<OneTrialTrashSummary> {
+    const [openString, closeString] = [open, close].map((date) => {
+      return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
     });
     const trashLogs = await this.databaseService.query<{
       userId: string;
@@ -173,24 +167,20 @@ export class CacheService {
           WHERE "userId" = ${userId} 
           AND "at" BETWEEN '${openString}' AND '${closeString}';`,
     );
+    let type: string,
+      success = 0,
+      failure = 0;
     await Promise.all(
-      trashLogs.map(({ type, ok }) => {
+      trashLogs.map(({ type: trashType, ok }) => {
         const key = `user-trash:${userId}-${open}`;
-        const field = `${type}-${ok ? 'success' : 'failure'}`;
+        const field = `${trashType}-${ok ? 'success' : 'failure'}`;
+        type = trashType;
+        ok ? success++ : failure++;
         return this.client.hIncrBy(key, field, 1);
       }),
     );
-
-    const userTrashLogsInOneUsage = await this.client.hGetAll(
-      `user-trash:${userId}-${open}`,
-    );
-
-    const type = Object.keys(userTrashLogsInOneUsage)[0]?.split('-')[0];
-    const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
-    const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
-
     return {
-      Date: open,
+      date: open,
       type,
       success,
       failure,
@@ -225,7 +215,7 @@ export class CacheService {
     });
   }
 
-  async getUserTrashSummary(userId: number): Promise<TrashSummary> {
+  async getUserTrashAllSummary(userId: number): Promise<TrashSummary> {
     const userTrashSummary = await this.client.hGetAll(`user-trash:${userId}`);
     return {
       can: {
@@ -247,14 +237,13 @@ export class CacheService {
     };
   }
 
-  async updateUserPoint(userId: number, change: number) {
-    await this.client.zIncrBy('user-point', change, userId.toString());
+  async updateUserTrashAllSummary(userId, type, successNum, failureNum) {
+    const key = `user-trash:${userId}`;
+    await this.client.hIncrBy(key, `${type}-success`, successNum);
+    await this.client.hIncrBy(key, `${type}-failure`, failureNum);
   }
 
-  updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
-    const today = new Date();
-    const key = `user-trash:${userId}-${today.getUTCFullYear()}-${today.getUTCMonth()}`;
-    const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
-    this.client.hIncrBy(key, field, 1);
+  async updateUserPoint(userId: number, change: number) {
+    await this.client.zIncrBy('user-point', change, userId.toString());
   }
 }
