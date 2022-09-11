@@ -29,12 +29,12 @@ export class TrashController {
   })
   async begin(
     @AccessUser() user,
-    //@Param('id', TrashcanByIdPipe) trashcan: Trashcan,
+    @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
   ): Promise<number> {
-    return await this.trashService.beginTrashcanUsage(user.id, 1);
+    return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
   }
 
-  @Post('end/:id')
+  @Post('end')
   @ApiOkResponse({
     description: 'End trashcan usage',
     type: Boolean,
