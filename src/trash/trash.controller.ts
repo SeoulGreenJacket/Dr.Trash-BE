@@ -59,9 +59,13 @@ export class TrashController {
     @Query('month', ParseIntPipe) month: number,
   ) {
     if (kind === 'all') {
-      return await this.trashService.getUserTrashSummaryAll(1);
+      return await this.trashService.getUserTrashSummaryAll(user.id);
     } else if (kind === 'detail') {
-      return await this.trashService.getUserTrashSummaryInMonth(1, year, month);
+      return await this.trashService.getUserTrashSummaryInMonth(
+        user.id,
+        year,
+        month,
+      );
     } else {
       throw new NotFoundException();
     }
