@@ -1,8 +1,10 @@
+import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { UsersRepository } from 'src/users/users.repository';
 import { Injectable } from '@nestjs/common';
 import { CacheService } from 'src/cache/cache.service';
 import { TrashSummary } from './dto/trash-summary.dto';
 import { TrashRepository } from './trash.repository';
+import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
 
 @Injectable()
 export class TrashService {
@@ -19,7 +21,7 @@ export class TrashService {
     return await this.trashRepository.createTrashcanUsage(userId, trashcanId);
   }
 
-  async endTrashcanUsage(usageId: number) {
+  async endTrashcanUsage(usageId: number): Promise<UserEndTrashRes> {
     const { userId, open, close } =
       await this.trashRepository.updateTrashcanUsage(usageId);
     const UserUsageTrialTrash = await this.cacheService.addUserUsageTrialTrash(
@@ -27,22 +29,26 @@ export class TrashService {
       open,
       close,
     );
-    const totalPoint = await (
-      await this.usersRepository.findByUserId(userId)
-    ).point;
+    const totalPoint = (await this.usersRepository.findByUserId(userId)).point;
+    await this.cacheService.updateUserTrashAllSummary(
+      userId,
+      UserUsageTrialTrash.type,
+      UserUsageTrialTrash.success,
+      UserUsageTrialTrash.failure,
+    );
 
     return { ...UserUsageTrialTrash, totalPoint };
   }
 
   async getUserTrashSummaryAll(userId: number): Promise<TrashSummary> {
-    return await this.cacheService.getUserTrashSummary(userId);
+    return await this.cacheService.getUserTrashAllSummary(userId);
   }
 
-  async getUserTrashSummaryInMonth(
+  async getUserTrashSummaryDetail(
     userId: number,
     year: number,
     month: number,
-  ) {
+  ): Promise<OneTrialTrashSummary[]> {
     return await this.cacheService.getUserTrashMonthlySummary(
       userId,
       year,
