@@ -22,7 +22,7 @@ export class TrashService {
   async endTrashcanUsage(usageId: number) {
     const { userId, open, close } =
       await this.trashRepository.updateTrashcanUsage(usageId);
-    const UserUsageTrialTrash = this.cacheService.addUserUsageTrialTrash(
+    const UserUsageTrialTrash = await this.cacheService.addUserUsageTrialTrash(
       userId,
       open,
       close,
