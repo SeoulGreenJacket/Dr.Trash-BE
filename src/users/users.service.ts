@@ -1,18 +1,20 @@
+import { AchievementsRepository } from 'src/achievements/achievements.repository';
 import { CacheService } from './../cache/cache.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { Injectable } from '@nestjs/common';
-import { Achievement } from './entities/achievement.entity';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { UserRankResponseDto } from './dto/user-rank-response.dto';
 import { Grade } from './types/grade.enum';
+import { UserAchievement } from 'src/achievements/entity/user-achievement.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     private usersRepository: UsersRepository,
     private cacheService: CacheService,
+    private achievementsRepository: AchievementsRepository,
   ) {}
 
   async create(kakaoId: bigint, thumbnail: string, name: string) {
@@ -36,8 +38,8 @@ export class UsersService {
         ? Grade.TheVolunteer
         : Grade.TheBeginner;
 
-    const achievement: Achievement[] =
-      await this.usersRepository.findAcheiveByUserId(id);
+    const achievement: UserAchievement[] =
+      await this.achievementsRepository.getUserAchievements(id);
 
     const rank = await this.cacheService.getUserRank(id);
 
