@@ -18,9 +18,13 @@ export class TrashService {
     userId: number,
     trashcanId: number,
   ): Promise<number> {
+    const usageId = await this.trashRepository.createTrashcanUsage(
+      userId,
+      trashcanId,
+    );
     await this.trashRepository.testInsert(userId, trashcanId, 'plastic', true);
     await this.trashRepository.testInsert(userId, trashcanId, 'plastic', false);
-    return await this.trashRepository.createTrashcanUsage(userId, trashcanId);
+    return usageId;
   }
 
   async endTrashcanUsage(usageId: number): Promise<UserEndTrashRes> {
