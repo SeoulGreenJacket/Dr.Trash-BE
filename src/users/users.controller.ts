@@ -36,8 +36,8 @@ export class UsersController {
 
   @ApiBearerAuth()
   @Get('count')
-  async countUserTrash(@AccessUser() user: User): Promise<number> {
-    return await this.usersService.countUserTrash(user.id);
+  async countUserTrashTrial(@AccessUser() user: User): Promise<number> {
+    return await this.usersService.countUserTrashTrial(user.id);
   }
 
   @ApiBearerAuth()
