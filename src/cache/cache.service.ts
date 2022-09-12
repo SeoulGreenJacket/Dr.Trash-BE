@@ -94,8 +94,8 @@ export class CacheService {
             at: Date;
             ok: string;
           }>(
-            `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash} 
-                WHERE "userId" = ${userId} 
+            `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash}
+                WHERE "userId" = ${userId}
                 AND "at" BETWEEN '${openString}' AND '${closeString}';`,
           );
         }),
@@ -173,11 +173,10 @@ export class CacheService {
       at: Date;
       ok: string;
     }>(
-      `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash} 
-          WHERE "userId" = ${userId} 
+      `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash}
+          WHERE "userId" = ${userId}
           AND "at" BETWEEN '${openString}' AND '${closeString}';`,
     );
-    console.log(trashLogs);
     let type: string,
       success = 0,
       failure = 0;
@@ -186,9 +185,7 @@ export class CacheService {
         const key = `user-trash:${userId}-${openString}`;
         const field = `${trashType}-${ok ? 'success' : 'failure'}`;
         type = trashType;
-        console.log(type);
         ok ? success++ : failure++;
-        console.log(success, failure);
         return this.client.hIncrBy(key, field, 1);
       }),
     );
@@ -205,6 +202,10 @@ export class CacheService {
       score: point,
       value: userId.toString(),
     });
+  }
+
+  async getUserPoint(userId: number): Promise<number> {
+    return await this.client.zScore('user-point', userId.toString());
   }
 
   async getUserRank(userId: number): Promise<number> {
