@@ -177,7 +177,7 @@ export class CacheService {
           WHERE "userId" = ${userId} 
           AND "at" BETWEEN '${openString}' AND '${closeString}';`,
     );
-    console.log(trashLogs);
+
     let type: string,
       success = 0,
       failure = 0;
@@ -186,9 +186,8 @@ export class CacheService {
         const key = `user-trash:${userId}-${openString}`;
         const field = `${trashType}-${ok ? 'success' : 'failure'}`;
         type = trashType;
-        console.log(type);
         ok ? success++ : failure++;
-        console.log(success, failure);
+
         return this.client.hIncrBy(key, field, 1);
       }),
     );
