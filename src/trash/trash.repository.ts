@@ -58,14 +58,14 @@ export class TrashRepository {
           "userId",
           "trashcanId",
           "type",
-          "ok",
+          "ok"
         )
       VALUES
         (
           ${userId},
           ${trashcanId},
           '${type}',
-          ok,
+          ${ok}
         )
     ;`);
   }
