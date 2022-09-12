@@ -1,5 +1,5 @@
 export class UserEndTrashRes {
-  totalPoint: number;
+  beforePoint: number;
   date: Date;
   type: string;
   success: number;
