@@ -1,3 +1,5 @@
+import { UsersModule } from 'src/users/users.module';
+import { UsersRepository } from 'src/users/users.repository';
 import { AchievementsModule } from 'src/achievements/achievements.module';
 import { Module, OnApplicationShutdown, forwardRef } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
@@ -11,6 +13,9 @@ import { CacheService } from './cache.service';
     DatabaseModule,
     forwardRef(() => {
       return AchievementsModule;
+    }),
+    forwardRef(() => {
+      return UsersModule;
     }),
   ],
   providers: [
@@ -28,10 +33,12 @@ export class CacheModule implements OnApplicationShutdown {
   constructor(
     private readonly moduleRef: ModuleRef,
     private readonly cacheService: CacheService,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async onApplicationBootstrap() {
     await this.moduleRef.get('REDIS_CLIENT').connect();
+    await this.usersRepository.resetUserPoint();
     await this.cacheService.flushAll();
     await this.cacheService.migrateUsersPoint();
     await this.cacheService.migrateUsersAllTrash();

@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { OneTrialTrashSummary } from 'src/trash/dto/one-trial-trash-summary.dto';
 import { AchievementsRepository } from 'src/achievements/achievements.repository';
+import { UsersRepository } from 'src/users/users.repository';
 
 @Injectable()
 export class CacheService {
@@ -14,6 +15,7 @@ export class CacheService {
     @Inject('REDIS_CLIENT') private client: Client,
     private readonly databaseService: DatabaseService,
     private readonly achievementsRepository: AchievementsRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
 
   async flushAll() {
@@ -111,9 +113,11 @@ export class CacheService {
     await Promise.all(
       usersTrashLogsInTrial.map(({ userId, open, trashLogs }) => {
         return Promise.all(
-          trashLogs.map(({ type, ok }) => {
+          trashLogs.map(async ({ type, ok }) => {
             const key = `user-trash:${userId}-${open}`;
             const field = `${type}-${ok ? 'success' : 'failure'}`;
+            const point = ok ? 10 : 0;
+            await this.usersRepository.updateUserPoint(userId, point);
             return this.client.hIncrBy(key, field, 1);
           }),
         );

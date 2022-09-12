@@ -49,11 +49,25 @@ export class UsersRepository {
     return result.length === 1 ? result[0].id : null;
   }
 
-  async countUserTrash(id: number): Promise<number> {
+  async countUserTrashTrial(id: number): Promise<number> {
     const result = await this.databaseService.query<{ count: number }>(
       `SELECT COUNT(*) FROM ${database.tables.trashcanUsage}
         WHERE "userId"=${id};`,
     );
     return result.length === 1 ? result[0].count : null;
+  }
+
+  async updateUserPoint(id: number, getPoint: number): Promise<User> {
+    const result = await this.databaseService.query<User>(
+      `UPDATE ${database.tables.user} SET point= point+${getPoint} WHERE id=${id} RETURNING *;`,
+    );
+    return result.length === 1 ? result[0] : null;
+  }
+
+  async resetUserPoint(): Promise<User[]> {
+    const result = await this.databaseService.query<User>(
+      `UPDATE ${database.tables.user} SET point=0 RETURNING *;`,
+    );
+    return result;
   }
 }
