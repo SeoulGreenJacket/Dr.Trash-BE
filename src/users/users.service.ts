@@ -73,7 +73,7 @@ export class UsersService {
     return await this.usersRepository.delete(id);
   }
 
-  async countUserTrash(id: number) {
-    return await this.usersRepository.countUserTrash(id);
+  async countUserTrashTrial(id: number) {
+    return await this.usersRepository.countUserTrashTrial(id);
   }
 }
