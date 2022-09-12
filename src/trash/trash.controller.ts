@@ -18,7 +18,6 @@ import { TrashSummary } from './dto/trash-summary.dto';
 import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
 import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { TrashService } from './trash.service';
-import { type } from 'os';
 
 @ApiTags('Trash')
 @Controller('trash')
