@@ -18,11 +18,8 @@ export class TrashService {
     userId: number,
     trashcanId: number,
   ): Promise<number> {
-    const type = ['pet', 'plastic'];
-    for (let i = 0; i < 2; i++) {
-      this.trashRepository.testInsert(userId, trashcanId, type[i], true);
-      this.trashRepository.testInsert(userId, trashcanId, type[i], false);
-    }
+    await this.trashRepository.testInsert(userId, trashcanId, 'plastic', true);
+    await this.trashRepository.testInsert(userId, trashcanId, 'plastic', false);
     return await this.trashRepository.createTrashcanUsage(userId, trashcanId);
   }
 
@@ -34,7 +31,9 @@ export class TrashService {
       open,
       close,
     );
-    const totalPoint = (await this.usersRepository.findByUserId(userId)).point;
+    const userGetPoint = UserUsageTrialTrash.success * 10;
+    const beforePoint = (await this.usersRepository.findByUserId(userId)).point;
+    await this.usersRepository.updateUserPoint(userId, userGetPoint);
     await this.cacheService.updateUserTrashAllSummary(
       userId,
       UserUsageTrialTrash.type,
@@ -42,7 +41,7 @@ export class TrashService {
       UserUsageTrialTrash.failure,
     );
 
-    return { ...UserUsageTrialTrash, totalPoint };
+    return { ...UserUsageTrialTrash, beforePoint };
   }
 
   async getUserTrashSummaryAll(userId: number): Promise<TrashSummary> {
