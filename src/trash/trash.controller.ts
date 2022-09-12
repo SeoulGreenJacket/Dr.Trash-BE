@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   DefaultValuePipe,
   Get,
@@ -17,6 +18,7 @@ import { TrashSummary } from './dto/trash-summary.dto';
 import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
 import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { TrashService } from './trash.service';
+import { type } from 'os';
 
 @ApiTags('Trash')
 @Controller('trash')
@@ -45,8 +47,9 @@ export class TrashController {
   async end(
     @AccessUser() user,
     @Query('usageId', ParseIntPipe) usageId: number,
+    @Body('type') type: string,
   ): Promise<UserEndTrashRes> {
-    return await this.trashService.endTrashcanUsage(usageId);
+    return await this.trashService.endTrashcanUsage(usageId, type);
   }
 
   @Get('summary/all')
