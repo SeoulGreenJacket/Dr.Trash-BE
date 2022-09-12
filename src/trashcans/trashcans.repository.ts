@@ -71,6 +71,25 @@ export class TrashcansRepository {
     return queryResult;
   }
 
+  async findByManagerId(userId: number): Promise<Trashcan[]> {
+    const queryResult = await this.databaseService.query<Trashcan>(`
+      SELECT
+        "id",
+        "managerId",
+        "code",
+        "name",
+        "phoneNumber",
+        "latitude",
+        "longitude"
+      FROM
+        ${this.trashcanTable}
+      WHERE
+        "managerId" = '${userId}'
+    ;`);
+
+    return queryResult;
+  }
+
   async findById(id: number): Promise<Trashcan> {
     const queryResult = await this.databaseService.query<Trashcan>(`
       SELECT

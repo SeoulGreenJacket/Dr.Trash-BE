@@ -18,13 +18,17 @@ import { TrashSummary } from './dto/trash-summary.dto';
 import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
 import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { TrashService } from './trash.service';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @ApiTags('Trash')
 @Controller('trash')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth()
 export class TrashController {
-  constructor(private readonly trashService: TrashService) {}
+  constructor(
+    private readonly trashService: TrashService,
+    private readonly achievementsService: AchievementsService,
+  ) {}
 
   @Post('begin/:id')
   @ApiOkResponse({
@@ -48,7 +52,9 @@ export class TrashController {
     @Query('usageId', ParseIntPipe) usageId: number,
     @Body('type') type: string,
   ): Promise<UserEndTrashRes> {
-    return await this.trashService.endTrashcanUsage(usageId, type);
+    const trashSummary = await this.trashService.endTrashcanUsage(usageId, type);
+    await this.achievementsService.checkTrashAchievements(user.id);
+    return trashSummary;
   }
 
   @Get('summary/all')
