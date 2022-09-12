@@ -40,7 +40,8 @@ export class TrashService {
     );
     const userGetPoint = UserUsageTrialTrash.success * 10;
     const beforePoint = (await this.usersRepository.findByUserId(userId)).point;
-    await this.usersRepository.updateUserPoint(userId, userGetPoint);
+    await this.usersRepository.increaseUserPoint(userId, userGetPoint);
+    await this.cacheService.updateUserPoint(userId, userGetPoint);
     await this.cacheService.updateUserTrashAllSummary(
       userId,
       UserUsageTrialTrash.type,
