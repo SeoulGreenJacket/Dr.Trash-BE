@@ -109,9 +109,9 @@ export class AchievementsRepository {
         ${database.tables.achiever}
         ON
         ${database.tables.achievement}."id" = ${database.tables.achiever}."achievementId"
-      WHERE
-        "userId" = $1
         AND
+        ${database.tables.achiever}."userId" = $1
+      WHERE
         "achievedAt" IS NULL
     `;
     const result = await this.databaseService.query<{ id: string }>(query, [
