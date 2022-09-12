@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   DefaultValuePipe,
   Get,
@@ -49,8 +50,9 @@ export class TrashController {
   async end(
     @AccessUser() user,
     @Query('usageId', ParseIntPipe) usageId: number,
+    @Body('type') type: string,
   ): Promise<UserEndTrashRes> {
-    const trashSummary = await this.trashService.endTrashcanUsage(usageId);
+    const trashSummary = await this.trashService.endTrashcanUsage(usageId, type);
     await this.achievementsService.checkTrashAchievements(user.id);
     return trashSummary;
   }

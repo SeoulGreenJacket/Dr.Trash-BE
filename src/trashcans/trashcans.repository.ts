@@ -7,9 +7,6 @@ import { database } from 'src/common/environments';
 
 @Injectable()
 export class TrashcansRepository {
-  private readonly trashcanTable = database.tables.trashcan;
-  private readonly trashcanCodeTable = database.tables.trashcanCode;
-
   constructor(private readonly databaseService: DatabaseService) {}
 
   async checkCode(code: string): Promise<boolean> {
@@ -17,7 +14,7 @@ export class TrashcansRepository {
       SELECT
         COUNT(1)
       FROM
-        ${this.trashcanCodeTable}
+        ${database.tables.trashcanCode}
       WHERE
         code = '${code}'
     ;`);
@@ -28,7 +25,7 @@ export class TrashcansRepository {
   async create(userId: number, dto: CreateTrashcanDto): Promise<boolean> {
     const queryResult = await this.databaseService.query<{ id: number }>(`
       INSERT INTO
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
         (
           "managerId",
           "code",
@@ -64,7 +61,7 @@ export class TrashcansRepository {
         "latitude",
         "longitude"
       FROM
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
       LIMIT
         ${limit}
       OFFSET
@@ -104,7 +101,7 @@ export class TrashcansRepository {
         "latitude",
         "longitude"
       FROM
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
       WHERE
         id = '${id}'
     ;`);
@@ -123,7 +120,7 @@ export class TrashcansRepository {
         "latitude",
         "longitude"
       FROM
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
       WHERE
         code = '${code}'
     ;`);
@@ -134,7 +131,7 @@ export class TrashcansRepository {
   async update(id: number, dto: UpdateTrashcanDto): Promise<boolean> {
     const queryResult = await this.databaseService.query<{ id: number }>(`
       UPDATE
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
       SET
         ${dto.name ? `"name" = '${dto.name}',` : ''}
         ${dto.phone ? `"phoneNumber" = '${dto.phone}',` : ''}
@@ -153,7 +150,7 @@ export class TrashcansRepository {
   async remove(id: number): Promise<boolean> {
     const queryResult = await this.databaseService.query<{ id: number }>(`
       DELETE FROM
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
       WHERE
         id = '${id}'
       RETURNING

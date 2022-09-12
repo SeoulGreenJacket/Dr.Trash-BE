@@ -117,7 +117,7 @@ export class CacheService {
             const key = `user-trash:${userId}-${open}`;
             const field = `${type}-${ok ? 'success' : 'failure'}`;
             const point = ok ? 10 : 0;
-            await this.usersRepository.updateUserPoint(userId, point);
+            await this.usersRepository.increaseUserPoint(userId, point);
             return this.client.hIncrBy(key, field, 1);
           }),
         );
@@ -186,6 +186,7 @@ export class CacheService {
         const field = `${trashType}-${ok ? 'success' : 'failure'}`;
         type = trashType;
         ok ? success++ : failure++;
+        
         return this.client.hIncrBy(key, field, 1);
       }),
     );

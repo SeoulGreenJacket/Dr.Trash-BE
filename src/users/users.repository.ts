@@ -2,7 +2,6 @@ import { User } from 'src/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { database } from 'src/common/environments';
-import { UserAchievement } from 'src/achievements/entity/user-achievement.entity';
 
 @Injectable()
 export class UsersRepository {
@@ -57,7 +56,7 @@ export class UsersRepository {
     return result.length === 1 ? result[0].count : null;
   }
 
-  async updateUserPoint(id: number, getPoint: number): Promise<User> {
+  async increaseUserPoint(id: number, getPoint: number): Promise<User> {
     const result = await this.databaseService.query<User>(
       `UPDATE ${database.tables.user} SET point= point+${getPoint} WHERE id=${id} RETURNING *;`,
     );
