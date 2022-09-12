@@ -61,8 +61,14 @@ export class TrashController {
   @Get('summary/detail')
   async detailSummary(
     @AccessUser() user,
-    @Query('year', ParseIntPipe, new DefaultValuePipe(0)) year: number,
-    @Query('month', ParseIntPipe, new DefaultValuePipe(0)) month: number,
+    @Query('year', ParseIntPipe, new DefaultValuePipe(new Date().getFullYear()))
+    year: number,
+    @Query(
+      'month',
+      ParseIntPipe,
+      new DefaultValuePipe(new Date().getMonth() + 1),
+    )
+    month: number,
   ): Promise<OneTrialTrashSummary[]> {
     return await this.trashService.getUserTrashSummaryDetail(
       user.id,
