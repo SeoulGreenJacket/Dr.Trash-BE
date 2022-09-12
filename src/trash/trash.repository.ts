@@ -53,7 +53,7 @@ export class TrashRepository {
   async testInsert(userId, trashcanId, type, ok) {
     await this.databaseService.query(`
       INSERT INTO
-        ${database.tables.trashcan}
+        ${database.tables.trash}
         (
           "userId",
           "trashcanId",
