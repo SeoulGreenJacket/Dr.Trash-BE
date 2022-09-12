@@ -2,7 +2,6 @@ import { User } from 'src/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { database } from 'src/common/environments';
-import { UserAchievement } from 'src/achievements/entity/user-achievement.entity';
 
 @Injectable()
 export class UsersRepository {
