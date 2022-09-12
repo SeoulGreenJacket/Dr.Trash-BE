@@ -62,8 +62,7 @@ export class UsersRepository {
   async countUserTrash(id: number): Promise<number> {
     const result = await this.databaseService.query<{ count: number }>(
       `SELECT COUNT(*) FROM ${database.tables.trashcanUsage}
-        WHERE "userId"=${id} 
-        AND open="TRUE";`,
+        WHERE "userId"=${id};`,
     );
     return result.length === 1 ? result[0].count : null;
   }
