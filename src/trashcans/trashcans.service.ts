@@ -27,6 +27,10 @@ export class TrashcansService {
     return await this.trashcansRepository.findAll(limit, offset);
   }
 
+  async findByManagerId(managerId: number): Promise<Trashcan[]> {
+    return await this.trashcansRepository.findByManagerId(managerId);
+  }
+
   async findById(id: number): Promise<Trashcan> {
     return await this.trashcansRepository.findById(id);
   }

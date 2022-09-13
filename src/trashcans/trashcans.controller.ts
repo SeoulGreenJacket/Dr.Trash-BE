@@ -19,12 +19,16 @@ import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { ApiTags } from '@nestjs/swagger';
 import { TrashcanByIdPipe } from './pipe/trashcan-by-id.pipe';
 import { Trashcan } from './entities/trashcan.entity';
+import { AchievementsService } from 'src/achievements/achievements.service';
 
 @ApiTags('Trashcan')
 @Controller('trashcans')
 @UseGuards(JwtAuthGuard)
 export class TrashcansController {
-  constructor(private readonly trashcansService: TrashcansService) {}
+  constructor(
+    private readonly trashcansService: TrashcansService,
+    private readonly achievementsService: AchievementsService,
+  ) {}
 
   @Get()
   async findAll(
@@ -37,6 +41,7 @@ export class TrashcansController {
   @Post()
   async create(@AccessUser() user, @Body() dto: CreateTrashcanDto) {
     await this.trashcansService.create(user.id, dto);
+    await this.achievementsService.checkTrashcanAchievements(user.id);
     return { message: 'success' };
   }
 
