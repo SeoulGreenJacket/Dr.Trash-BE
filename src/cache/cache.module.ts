@@ -40,9 +40,9 @@ export class CacheModule implements OnApplicationShutdown {
     await this.moduleRef.get('REDIS_CLIENT').connect();
     await this.usersRepository.resetUserPoint();
     await this.cacheService.flushAll();
-    await this.cacheService.migrateUsersPoint();
     await this.cacheService.migrateUsersAllTrash();
     await this.cacheService.migrateUsersUsageTrialTrash();
+    await this.cacheService.migrateUsersPoint();
   }
 
   onApplicationShutdown() {
