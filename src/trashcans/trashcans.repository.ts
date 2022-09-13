@@ -50,7 +50,11 @@ export class TrashcansRepository {
     return queryResult.length === 1;
   }
 
-  async findAll(limit: number, offset: number): Promise<Trashcan[]> {
+  async findAll(
+    limit: number,
+    offset: number,
+    managerId: number,
+  ): Promise<Trashcan[]> {
     const queryResult = await this.databaseService.query<Trashcan>(`
       SELECT
         "id",
@@ -62,6 +66,7 @@ export class TrashcansRepository {
         "longitude"
       FROM
         ${database.tables.trashcan}
+      ${managerId === 0 ? '' : `WHERE "managerId" = '${managerId}'`}
       LIMIT
         ${limit}
       OFFSET
@@ -82,7 +87,7 @@ export class TrashcansRepository {
         "latitude",
         "longitude"
       FROM
-        ${this.trashcanTable}
+        ${database.tables.trashcan}
       WHERE
         "managerId" = '${userId}'
     ;`);

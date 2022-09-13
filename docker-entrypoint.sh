@@ -3,7 +3,8 @@
 if [[ "${NODE_ENV}" == "production" ]]
 then
     echo "Running in production mode"
-    npm run start
+    npm run build
+    npm run start:prod
 elif [[ "${NODE_ENV}" == "development" ]]
 then
     echo "Running in development mode"

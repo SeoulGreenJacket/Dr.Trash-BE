@@ -34,8 +34,9 @@ export class TrashcansController {
   async findAll(
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
+    @Query('manager', new DefaultValuePipe(0), ParseIntPipe) managerId: number,
   ) {
-    return await this.trashcansService.findAll(limit ?? 10, offset ?? 0);
+    return await this.trashcansService.findAll(limit, offset, managerId);
   }
 
   @Post()

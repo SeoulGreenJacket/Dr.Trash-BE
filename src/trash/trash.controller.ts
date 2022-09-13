@@ -19,6 +19,7 @@ import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
 import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { TrashService } from './trash.service';
 import { AchievementsService } from 'src/achievements/achievements.service';
+import { TrashcanByCodePipe } from 'src/trashcans/pipe/trashcan-by-code.pipe';
 
 @ApiTags('Trash')
 @Controller('trash')
@@ -30,14 +31,14 @@ export class TrashController {
     private readonly achievementsService: AchievementsService,
   ) {}
 
-  @Post('begin/:id')
+  @Post('begin/:code')
   @ApiOkResponse({
     description: 'Begin trashcan usage',
     type: Boolean,
   })
   async begin(
     @AccessUser() user,
-    @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
+    @Param('code', TrashcanByCodePipe) trashcan: Trashcan,
   ): Promise<number> {
     return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
   }
@@ -52,7 +53,10 @@ export class TrashController {
     @Query('usageId', ParseIntPipe) usageId: number,
     @Body('type') type: string,
   ): Promise<UserEndTrashRes> {
-    const trashSummary = await this.trashService.endTrashcanUsage(usageId, type);
+    const trashSummary = await this.trashService.endTrashcanUsage(
+      usageId,
+      type,
+    );
     await this.achievementsService.checkTrashAchievements(user.id);
     return trashSummary;
   }
