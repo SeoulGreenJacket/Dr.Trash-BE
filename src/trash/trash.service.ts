@@ -22,14 +22,12 @@ export class TrashService {
       userId,
       trashcanId,
     );
-    await this.trashRepository.testInsert(userId, trashcanId, 'plastic', true);
-    await this.trashRepository.testInsert(userId, trashcanId, 'plastic', false);
     return usageId;
   }
 
   async endTrashcanUsage(
     usageId: number,
-    type: string,
+    trashcanType: string,
   ): Promise<UserEndTrashRes> {
     const { userId, open, close } =
       await this.trashRepository.updateTrashcanUsage(usageId);
@@ -37,6 +35,7 @@ export class TrashService {
       userId,
       open,
       close,
+      trashcanType
     );
     const userGetPoint = UserUsageTrialTrash.success * 10;
     const beforePoint = (await this.usersRepository.findByUserId(userId)).point;
@@ -49,7 +48,7 @@ export class TrashService {
       UserUsageTrialTrash.failure,
     );
 
-    return { ...UserUsageTrialTrash, type, beforePoint };
+    return { ...UserUsageTrialTrash, beforePoint };
   }
 
   async getUserTrashSummaryAll(userId: number): Promise<TrashSummary> {
