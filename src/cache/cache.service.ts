@@ -159,6 +159,7 @@ export class CacheService {
     userId: number,
     open: Date,
     close: Date,
+    trashcanType:string
   ): Promise<OneTrialTrashSummary> {
     const [openString, closeString] = [open, close].map((date) => {
       return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
@@ -171,20 +172,21 @@ export class CacheService {
       userId: string;
       type: string;
       at: Date;
-      ok: string;
+      ok: boolean;
     }>(
       `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash}
           WHERE "userId" = ${userId}
           AND "at" BETWEEN '${openString}' AND '${closeString}';`,
     );
-    let type: string,
-      success = 0,
+    let success = 0,
       failure = 0;
     await Promise.all(
       trashLogs.map(({ type: trashType, ok }) => {
+        if (trashcanType != trashType){
+          ok=false;
+        }
         const key = `user-trash:${userId}-${openString}`;
         const field = `${trashType}-${ok ? 'success' : 'failure'}`;
-        type = trashType;
         ok ? success++ : failure++;
         
         return this.client.hIncrBy(key, field, 1);
@@ -192,7 +194,7 @@ export class CacheService {
     );
     return {
       date: open,
-      type,
+      type: trashcanType,
       success,
       failure,
     };
