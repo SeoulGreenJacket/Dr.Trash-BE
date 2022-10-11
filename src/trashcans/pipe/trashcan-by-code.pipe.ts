@@ -7,11 +7,11 @@ import {
 import { TrashcansRepository } from '../trashcans.repository';
 
 @Injectable()
-export class TrashcanByIdPipe implements PipeTransform<number> {
+export class TrashcanByCodePipe implements PipeTransform<string> {
   constructor(private readonly trashcansRepository: TrashcansRepository) {}
 
-  async transform(value: number, metadata: ArgumentMetadata) {
-    const trashcan = await this.trashcansRepository.findById(value);
+  async transform(value: string, metadata: ArgumentMetadata) {
+    const trashcan = await this.trashcansRepository.findByCode(value);
     if (trashcan === null) {
       throw new NotFoundException('Trashcan not found');
     }

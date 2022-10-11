@@ -1,15 +1,26 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisClientType as Client } from 'redis';
-import { database } from 'src/common/environments';
+import { database, redis } from 'src/common/environments';
 import { DatabaseService } from 'src/database/database.service';
 import { TrashSummary } from 'src/trash/dto/trash-summary.dto';
+import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
+import { OneTrialTrashSummary } from 'src/trash/dto/one-trial-trash-summary.dto';
+import { AchievementsRepository } from 'src/achievements/achievements.repository';
+import { UsersRepository } from 'src/users/users.repository';
 
 @Injectable()
 export class CacheService {
   constructor(
     @Inject('REDIS_CLIENT') private client: Client,
     private readonly databaseService: DatabaseService,
+    private readonly achievementsRepository: AchievementsRepository,
+    private readonly usersRepository: UsersRepository,
   ) {}
+
+  async flushAll() {
+    await this.client.flushAll();
+  }
 
   async migrateUsersPoint() {
     const usersPoint = await this.databaseService.query<{
@@ -33,7 +44,7 @@ export class CacheService {
     }
   }
 
-  async migrateUsersTrash() {
+  async migrateUsersAllTrash() {
     const usersTrash = await this.databaseService.query<{
       userId: string;
       type: string;
@@ -43,12 +54,150 @@ export class CacheService {
       SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash};
     `);
     return Promise.all(
-      usersTrash.map(({ userId, type, at, ok }) => {
-        const key = `user-trash:${userId}-${at.getUTCFullYear()}-${at.getUTCMonth()}`;
+      usersTrash.map(({ userId, type, ok }) => {
+        const key = `user-trash:${userId}`;
         const field = `${type}-${ok ? 'success' : 'failure'}`;
         return this.client.hIncrBy(key, field, 1);
       }),
     );
+  }
+
+  async migrateUsersUsageTrialTrash() {
+    const usersTrashUsage = await this.databaseService.query<{
+      userId: number;
+      trashcanId: string;
+      open: Date;
+      close: Date;
+    }>(
+      `SELECT "userId", "trashcanId", "open", "close" FROM ${database.tables.trashcanUsage};`,
+    );
+    await Promise.all(
+      usersTrashUsage.map(({ userId, open }) => {
+        const openString = format(open, 'yyyy-MM-dd HH:mm:ss.SSS', {
+          locale: ko,
+        });
+        const key = `user-trash:${userId}-${open.getFullYear()}-${
+          open.getMonth() + 1
+        }`;
+        return this.client.rPush(key, openString);
+      }),
+    );
+    const usersTrashLogsInTrial = (
+      await Promise.all(
+        usersTrashUsage.map(({ userId, open, close }) => {
+          const [openString, closeString] = [open, close].map((date) => {
+            return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
+          });
+          return this.databaseService.query<{
+            userId: string;
+            type: string;
+            at: Date;
+            ok: string;
+          }>(
+            `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash}
+                WHERE "userId" = ${userId}
+                AND "at" BETWEEN '${openString}' AND '${closeString}';`,
+          );
+        }),
+      )
+    ).map((trashLogs, index) => {
+      return {
+        userId: usersTrashUsage[index].userId,
+        open: format(usersTrashUsage[index].open, 'yyyy-MM-dd HH:mm:ss.SSS', {
+          locale: ko,
+        }),
+        trashLogs,
+      };
+    });
+
+    await Promise.all(
+      usersTrashLogsInTrial.map(({ userId, open, trashLogs }) => {
+        return Promise.all(
+          trashLogs.map(async ({ type, ok }) => {
+            const key = `user-trash:${userId}-${open}`;
+            const field = `${type}-${ok ? 'success' : 'failure'}`;
+            const point = ok ? 10 : 0;
+            await this.usersRepository.increaseUserPoint(userId, point);
+            return this.client.hIncrBy(key, field, 1);
+          }),
+        );
+      }),
+    );
+  }
+
+  async getUserTrashMonthlySummary(
+    userId: number,
+    year: number,
+    month: number,
+  ): Promise<OneTrialTrashSummary[]> {
+    const userTrashUsagesInMonth = await this.client.lRange(
+      `user-trash:${userId}-${year}-${month}`,
+      0,
+      -1,
+    );
+
+    return (
+      await Promise.all(
+        userTrashUsagesInMonth.map((open) => {
+          return this.client.hGetAll(`user-trash:${userId}-${open}`);
+        }),
+      )
+    ).map((userTrashLogsInOneUsage, index) => {
+      const type = Object.keys(userTrashLogsInOneUsage)[0]?.split('-')[0];
+      const success = +(userTrashLogsInOneUsage[`${type}-success`] ?? 0);
+      const failure = +(userTrashLogsInOneUsage[`${type}-failure`] ?? 0);
+      return {
+        date: new Date(userTrashUsagesInMonth[index]),
+        type,
+        success,
+        failure,
+      };
+    });
+  }
+
+  async addUserUsageTrialTrash(
+    userId: number,
+    open: Date,
+    close: Date,
+    trashcanType:string
+  ): Promise<OneTrialTrashSummary> {
+    const [openString, closeString] = [open, close].map((date) => {
+      return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
+    });
+    await this.client.rPush(
+      `user-trash:${userId}-${open.getFullYear()}-${open.getMonth() + 1}`,
+      openString,
+    );
+    const trashLogs = await this.databaseService.query<{
+      userId: string;
+      type: string;
+      at: Date;
+      ok: boolean;
+    }>(
+      `SELECT "userId", "type", "at", "ok" FROM ${database.tables.trash}
+          WHERE "userId" = ${userId}
+          AND "at" BETWEEN '${openString}' AND '${closeString}';`,
+    );
+    let success = 0,
+      failure = 0;
+    await Promise.all(
+      trashLogs.map(({ type: trashType, ok }) => {
+        if (trashcanType != trashType){
+          ok=false;
+        }
+        const key = `user-trash:${userId}-${openString}`;
+        const field = `${trashType}-${ok ? 'success' : 'failure'}`;
+        ok ? success++ : failure++;
+        
+        return this.client.hIncrBy(key, field, 1);
+      }),
+    );
+    return {
+      date: open,
+      type: trashcanType,
+      success,
+      failure,
+    };
   }
 
   async addUserPoint(userId: number, point: number) {
@@ -56,6 +205,10 @@ export class CacheService {
       score: point,
       value: userId.toString(),
     });
+  }
+
+  async getUserPoint(userId: number): Promise<number> {
+    return await this.client.zScore('user-point', userId.toString());
   }
 
   async getUserRank(userId: number): Promise<number> {
@@ -79,14 +232,8 @@ export class CacheService {
     });
   }
 
-  async getUserTrashSummary(
-    userId: number,
-    year: number,
-    month: number,
-  ): Promise<TrashSummary> {
-    const userTrashSummary = await this.client.hGetAll(
-      `user-trash:${userId}-${year}-${month}`,
-    );
+  async getUserTrashAllSummary(userId: number): Promise<TrashSummary> {
+    const userTrashSummary = await this.client.hGetAll(`user-trash:${userId}`);
     return {
       can: {
         success: +(userTrashSummary['can-success'] ?? 0),
@@ -107,14 +254,32 @@ export class CacheService {
     };
   }
 
+  async updateUserTrashAllSummary(userId, type, successNum, failureNum) {
+    const key = `user-trash:${userId}`;
+    await this.client.hIncrBy(key, `${type}-success`, successNum);
+    await this.client.hIncrBy(key, `${type}-failure`, failureNum);
+  }
+
   async updateUserPoint(userId: number, change: number) {
     await this.client.zIncrBy('user-point', change, userId.toString());
   }
 
-  updateUserTrash(userId: number, trashType: string, isCorrect: boolean) {
-    const today = new Date();
-    const key = `user-trash:${userId}-${today.getUTCFullYear()}-${today.getUTCMonth()}`;
-    const field = `${trashType}-${isCorrect ? 'success' : 'failure'}`;
-    this.client.hIncrBy(key, field, 1);
+  async updateAchievementNotification(userId: number, achievementId: number) {
+    await this.client.sAdd(
+      `${redis.keys.achievementNotification}:${userId}`,
+      achievementId.toString(),
+    );
+  }
+
+  async getAchievementNotifications(userId: number) {
+    const achievementIds = await this.client.sMembers(
+      `${redis.keys.achievementNotification}:${userId}`,
+    );
+    await this.client.del(`${redis.keys.achievementNotification}:${userId}`);
+    return Promise.all(
+      achievementIds.map((id) => {
+        return this.achievementsRepository.getAchievement(+id);
+      }),
+    );
   }
 }

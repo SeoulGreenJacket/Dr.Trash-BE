@@ -1,5 +1,7 @@
 import {
+  Body,
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
   ParseIntPipe,
@@ -7,54 +9,83 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { Trashcan } from 'src/trashcans/entities/trashcan.entity';
 import { TrashcanByIdPipe } from 'src/trashcans/pipe/trashcan-by-id.pipe';
 import { TrashSummary } from './dto/trash-summary.dto';
+import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
+import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { TrashService } from './trash.service';
+import { AchievementsService } from 'src/achievements/achievements.service';
+import { TrashcanByCodePipe } from 'src/trashcans/pipe/trashcan-by-code.pipe';
 
 @ApiTags('Trash')
 @Controller('trash')
 @UseGuards(JwtAuthGuard)
+@ApiBearerAuth()
 export class TrashController {
-  constructor(private readonly trashService: TrashService) {}
+  constructor(
+    private readonly trashService: TrashService,
+    private readonly achievementsService: AchievementsService,
+  ) {}
 
-  @Post('begin/:id')
+  @Post('begin/:code')
   @ApiOkResponse({
     description: 'Begin trashcan usage',
     type: Boolean,
   })
   async begin(
     @AccessUser() user,
-    @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
-  ): Promise<boolean> {
+    @Param('code', TrashcanByCodePipe) trashcan: Trashcan,
+  ): Promise<number> {
     return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
   }
 
-  @Post('end/:id')
+  @Post('end')
   @ApiOkResponse({
     description: 'End trashcan usage',
     type: Boolean,
   })
   async end(
     @AccessUser() user,
-    @Param('id', TrashcanByIdPipe) trashcan: Trashcan,
-  ): Promise<boolean> {
-    return await this.trashService.endTrashcanUsage(user.id, trashcan.id);
+    @Query('usageId', ParseIntPipe) usageId: number,
+    @Body('trashcanType') trashcanType: string,
+  ): Promise<UserEndTrashRes> {
+    const trashSummary = await this.trashService.endTrashcanUsage(
+      usageId,
+      trashcanType,
+    );
+    await this.achievementsService.checkTrashAchievements(user.id);
+    return trashSummary;
   }
 
-  @Get('summary')
+  @Get('summary/all')
   @ApiOkResponse({
     description: 'Get trash summary',
     type: TrashSummary,
   })
-  async summary(
+  async allSummary(@AccessUser() user): Promise<TrashSummary> {
+    return await this.trashService.getUserTrashSummaryAll(user.id);
+  }
+
+  @Get('summary/detail')
+  async detailSummary(
     @AccessUser() user,
-    @Query('year', ParseIntPipe) year,
-    @Query('month', ParseIntPipe) month,
-  ): Promise<TrashSummary> {
-    return await this.trashService.getUserTrashSummary(user.id, year, month);
+    @Query('year', ParseIntPipe, new DefaultValuePipe(new Date().getFullYear()))
+    year: number,
+    @Query(
+      'month',
+      ParseIntPipe,
+      new DefaultValuePipe(new Date().getMonth() + 1),
+    )
+    month: number,
+  ): Promise<OneTrialTrashSummary[]> {
+    return await this.trashService.getUserTrashSummaryDetail(
+      user.id,
+      year,
+      month,
+    );
   }
 }

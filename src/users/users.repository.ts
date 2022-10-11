@@ -2,7 +2,6 @@ import { User } from 'src/users/entities/user.entity';
 import { Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { database } from 'src/common/environments';
-import { Achievement } from './entities/achievement.entity';
 
 @Injectable()
 export class UsersRepository {
@@ -33,16 +32,6 @@ export class UsersRepository {
     return result.length === 1 ? result[0] : null;
   }
 
-  async findAcheiveByUserId(userId: number): Promise<Achievement[]> {
-    const result = await this.databaseService.query<Achievement>(
-      `SELECT ${database.tables.achievement}.*,${database.tables.achiever}."achievedAt"
-        FROM ${database.tables.achievement} LEFT JOIN ${database.tables.achiever}
-            ON ${database.tables.achievement}.id = ${database.tables.achiever}."achievementId"
-            AND ${database.tables.achiever}."userId" = ${userId};`,
-    );
-    return result;
-  }
-
   async update(name: string, thumbnail: string, id: number): Promise<User> {
     const result = await this.databaseService.query<User>(
       `UPDATE ${database.tables.user} SET name='${name}', thumbnail='${thumbnail}' 
@@ -59,12 +48,25 @@ export class UsersRepository {
     return result.length === 1 ? result[0].id : null;
   }
 
-  async countUserTrash(id: number): Promise<number> {
+  async countUserTrashTrial(id: number): Promise<number> {
     const result = await this.databaseService.query<{ count: number }>(
       `SELECT COUNT(*) FROM ${database.tables.trashcanUsage}
-        WHERE "userId"=${id} 
-        AND open="TRUE";`,
+        WHERE "userId"=${id};`,
     );
     return result.length === 1 ? result[0].count : null;
+  }
+
+  async increaseUserPoint(id: number, getPoint: number): Promise<User> {
+    const result = await this.databaseService.query<User>(
+      `UPDATE ${database.tables.user} SET point= point+${getPoint} WHERE id=${id} RETURNING *;`,
+    );
+    return result.length === 1 ? result[0] : null;
+  }
+
+  async resetUserPoint(): Promise<User[]> {
+    const result = await this.databaseService.query<User>(
+      `UPDATE ${database.tables.user} SET point=0 RETURNING *;`,
+    );
+    return result;
   }
 }
