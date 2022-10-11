@@ -51,11 +51,11 @@ export class TrashController {
   async end(
     @AccessUser() user,
     @Query('usageId', ParseIntPipe) usageId: number,
-    @Body('type') type: string,
+    @Body('trashcanType') trashcanType: string,
   ): Promise<UserEndTrashRes> {
     const trashSummary = await this.trashService.endTrashcanUsage(
       usageId,
-      type,
+      trashcanType,
     );
     await this.achievementsService.checkTrashAchievements(user.id);
     return trashSummary;
