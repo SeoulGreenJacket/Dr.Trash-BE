@@ -35,7 +35,7 @@ export class TrashService {
       userId,
       open,
       close,
-      trashcanType
+      trashcanType,
     );
     const userGetPoint = UserUsageTrialTrash.success * 10;
     const beforePoint = (await this.usersRepository.findByUserId(userId)).point;
