@@ -9,6 +9,7 @@ import { TrashModule } from './trash/trash.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AchievementInterceptor } from './achievements/achievement.interceptor';
+import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AchievementInterceptor } from './achievements/achievement.interceptor';
     }),
     TrashcansModule,
     TrashModule,
+    KafkaModule,
   ],
   providers: [
     {
