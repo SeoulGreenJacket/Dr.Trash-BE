@@ -1,5 +1,4 @@
 import { AchievementsRepository } from 'src/achievements/achievements.repository';
-import { CacheService } from './../cache/cache.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { Injectable } from '@nestjs/common';
@@ -13,7 +12,6 @@ import { UserAchievement } from 'src/achievements/entity/user-achievement.entity
 export class UsersService {
   constructor(
     private usersRepository: UsersRepository,
-    private cacheService: CacheService,
     private achievementsRepository: AchievementsRepository,
   ) {}
 
@@ -23,50 +21,57 @@ export class UsersService {
       thumbnail,
       kakaoId,
     );
-    await this.cacheService.addUserPoint(user.id, user.point);
     return user;
   }
 
   async findOne(id: number): Promise<UserResponseDto> {
-    const { name, thumbnail, point } = await this.usersRepository.findByUserId(
+    const { name, thumbnail, point } = await this.usersRepository.findOne({
       id,
-    );
-    const userGrade: Grade =
-      point >= 1000
-        ? Grade.RecycleMaster
-        : point >= 500
-        ? Grade.TheVolunteer
-        : Grade.TheBeginner;
+    });
+    const rank = await this.usersRepository.findRank(id);
 
     const achievement: UserAchievement[] =
       await this.achievementsRepository.getUserAchievements(id);
 
-    const rank = await this.cacheService.getUserRank(id);
+    return {
+      id,
+      name,
+      thumbnail,
+      point,
+      userGrade:
+        point >= 1000
+          ? Grade.RecycleMaster
+          : point >= 500
+          ? Grade.TheVolunteer
+          : Grade.TheBeginner,
+      achievement,
+      rank,
+    };
+  }
 
-    return { id, name, thumbnail, point, userGrade, achievement, rank };
+  async findRank(id: number) {
+    return await this.usersRepository.findRank(id);
   }
 
   async findRankAll(
     limit: number,
     offset: number,
   ): Promise<UserRankResponseDto[]> {
-    const userRanklist = await this.cacheService.getUserRankList(limit, offset);
-
-    return await Promise.all(
-      userRanklist.map(async ({ score: point, value: userId }) => {
-        const { name } = await this.usersRepository.findByUserId(userId);
-        return { userId, point, userName: name };
-      }),
-    );
+    const userList = await this.usersRepository.findRankAll(limit, offset);
+    return userList.map((user) => {
+      return {
+        userId: user.id,
+        userName: user.name,
+        point: user.point,
+      };
+    });
   }
 
-  async update(userUpdateDto: UserUpdateDto, user: User) {
-    const updateUser = { ...user, ...userUpdateDto };
-    return await this.usersRepository.update(
-      updateUser.name,
-      updateUser.thumbnail,
-      updateUser.id,
-    );
+  async update(
+    id: number,
+    values: { [key: string]: string | number | bigint },
+  ) {
+    return await this.usersRepository.update(id, values);
   }
 
   async delete(id: number) {

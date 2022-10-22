@@ -1,19 +1,17 @@
-import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
-import { UsersRepository } from 'src/users/users.repository';
 import { ConflictException, Injectable } from '@nestjs/common';
-import { CacheService } from 'src/cache/cache.service';
-import { TrashSummary } from './dto/trash-summary.dto';
+import { TrashLog } from './dto/trash-log.dto';
 import { TrashRepository } from './trash.repository';
-import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
+import { TrashcansRepository } from 'src/trashcans/trashcans.repository';
 import { KafkaService } from 'src/kafka/kafka.service';
 import { setTimeout } from 'timers/promises';
+import { UsersRepository } from 'src/users/users.repository';
 
 @Injectable()
 export class TrashService {
   constructor(
-    private readonly trashRepository: TrashRepository,
-    private readonly cacheService: CacheService,
     private readonly usersRepository: UsersRepository,
+    private readonly trashRepository: TrashRepository,
+    private readonly trashcansRepository: TrashcansRepository,
     private readonly kafkaService: KafkaService,
   ) {}
 
@@ -29,55 +27,51 @@ export class TrashService {
     return usageId;
   }
 
-  async endTrashcanUsage(
-    usageId: number,
-    trashcanType: string,
-  ): Promise<UserEndTrashRes> {
-    const usage = await this.trashRepository.getLastUsage(usageId);
-    if (usage) {
-      this.kafkaService.send(usage?.code.toString(), 'pause');
-    } else {
+  async endTrashcanUsage(userId: number) {
+    const usage = await this.trashRepository.getLastUsage(userId);
+    if (!usage) {
       throw new ConflictException('Open trashcan first');
     }
+    const trashcan = await this.trashcansRepository.findById(usage.trashcanId);
+    this.kafkaService.send(trashcan.code, 'pause');
 
     // wait for last image to be processed
     // TODO: change to something better
     await setTimeout(5000, 'All done');
 
-    const { userId, open, close } =
-      await this.trashRepository.updateTrashcanUsage(usageId);
-    const UserUsageTrialTrash = await this.cacheService.addUserUsageTrialTrash(
-      userId,
-      open,
-      close,
-      trashcanType,
-    );
-    const userGetPoint = UserUsageTrialTrash.success * 10;
-    const beforePoint = (await this.usersRepository.findByUserId(userId)).point;
-    await this.usersRepository.increaseUserPoint(userId, userGetPoint);
-    await this.cacheService.updateUserPoint(userId, userGetPoint);
-    await this.cacheService.updateUserTrashAllSummary(
-      userId,
-      UserUsageTrialTrash.type,
-      UserUsageTrialTrash.success,
-      UserUsageTrialTrash.failure,
-    );
-    return { ...UserUsageTrialTrash, beforePoint };
+    await this.trashRepository.closeTrashcan(usage.id);
+    return { date: usage.beginAt, type: trashcan.type };
   }
 
-  async getUserTrashSummaryAll(userId: number): Promise<TrashSummary> {
-    return await this.cacheService.getUserTrashAllSummary(userId);
-  }
-
-  async getUserTrashSummaryDetail(
+  async getTrashLog(
     userId: number,
-    year: number,
-    month: number,
-  ): Promise<OneTrialTrashSummary[]> {
-    return await this.cacheService.getUserTrashMonthlySummary(
-      userId,
-      year,
-      month,
-    );
+    from: Date = new Date(0),
+    to: Date = new Date(),
+  ) {
+    const trashCount = await this.trashRepository.countTrash(userId, from, to);
+    const trashLog: TrashLog = {
+      can: {
+        success: 0,
+        failure: 0,
+      },
+      pet: {
+        success: 0,
+        failure: 0,
+      },
+      plastic: {
+        success: 0,
+        failure: 0,
+      },
+    };
+
+    trashCount.forEach((count) => {
+      if (count.trashType === count.trashcanType) {
+        trashLog[count.trashcanType].success += count.count;
+      } else {
+        trashLog[count.trashcanType].failure += count.count;
+      }
+    });
+
+    return trashLog;
   }
 }

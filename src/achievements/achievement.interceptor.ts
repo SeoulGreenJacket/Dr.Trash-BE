@@ -5,12 +5,13 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { map } from 'rxjs';
-import { CacheService } from 'src/cache/cache.service';
+import { AchievementsService } from './achievements.service';
 
 @Injectable()
 export class AchievementInterceptor {
   constructor(
-    @Inject(CacheService) private readonly cacheService: CacheService,
+    @Inject(AchievementsService)
+    private readonly achievementsService: AchievementsService,
   ) {}
 
   intercept(context: ExecutionContext, next: CallHandler) {
@@ -21,7 +22,7 @@ export class AchievementInterceptor {
           return {
             data,
             achievement: userId
-              ? await this.cacheService.getAchievementNotifications(userId)
+              ? await this.achievementsService.getNotifications(userId)
               : null,
           };
         }),
