@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { Kafka } from 'kafkajs';
+import { Kafka, Partitioners } from 'kafkajs';
 import { kafka } from 'src/common/environments';
 import { KafkaService } from './kafka.service';
 
@@ -8,21 +8,19 @@ import { KafkaService } from './kafka.service';
   providers: [
     {
       provide: 'KAFKA_PRODUCER',
-      useFactory: () => {
-        return new Kafka({
+      useFactory: () =>
+        new Kafka({
           clientId: 'drtrash',
           brokers: [`${kafka.host}:${kafka.port}`],
-        }).producer();
-      },
+        }).producer({ createPartitioner: Partitioners.LegacyPartitioner }),
     },
     {
       provide: 'KAFKA_CONSUMER',
-      useFactory: () => {
-        return new Kafka({
+      useFactory: () =>
+        new Kafka({
           clientId: 'drtrash',
           brokers: [`${kafka.host}:${kafka.port}`],
-        }).consumer({ groupId: 'drtrash' });
-      },
+        }).consumer({ groupId: 'drtrash' }),
     },
     KafkaService,
   ],
