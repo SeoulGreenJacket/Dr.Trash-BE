@@ -9,6 +9,7 @@ import { TrashModule } from './trash/trash.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AchievementInterceptor } from './achievements/achievement.interceptor';
+import { ArticlesModule } from './articles/articles.module';
 
 @Module({
   imports: [
@@ -19,10 +20,11 @@ import { AchievementInterceptor } from './achievements/achievement.interceptor';
     AchievementsModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.development.env',
+      envFilePath: '.env',
     }),
     TrashcansModule,
     TrashModule,
+    ArticlesModule,
   ],
   providers: [
     {
