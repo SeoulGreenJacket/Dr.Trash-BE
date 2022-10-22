@@ -1,10 +1,12 @@
 import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 import { UsersRepository } from 'src/users/users.repository';
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CacheService } from 'src/cache/cache.service';
 import { TrashSummary } from './dto/trash-summary.dto';
 import { TrashRepository } from './trash.repository';
 import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
+import { KafkaService } from 'src/kafka/kafka.service';
+import { setTimeout } from 'timers/promises';
 
 @Injectable()
 export class TrashService {
@@ -12,6 +14,7 @@ export class TrashService {
     private readonly trashRepository: TrashRepository,
     private readonly cacheService: CacheService,
     private readonly usersRepository: UsersRepository,
+    private readonly kafkaService: KafkaService,
   ) {}
 
   async beginTrashcanUsage(
@@ -22,6 +25,7 @@ export class TrashService {
       userId,
       trashcanId,
     );
+    this.kafkaService.send(trashcanId.toString(), 'start');
     return usageId;
   }
 
@@ -29,13 +33,24 @@ export class TrashService {
     usageId: number,
     trashcanType: string,
   ): Promise<UserEndTrashRes> {
+    const usage = await this.trashRepository.getLastUsage(usageId);
+    if (usage) {
+      this.kafkaService.send(usage?.code.toString(), 'pause');
+    } else {
+      throw new ConflictException('Open trashcan first');
+    }
+
+    // wait for last image to be processed
+    // TODO: change to something better
+    await setTimeout(5000, 'All done');
+
     const { userId, open, close } =
       await this.trashRepository.updateTrashcanUsage(usageId);
     const UserUsageTrialTrash = await this.cacheService.addUserUsageTrialTrash(
       userId,
       open,
       close,
-      trashcanType
+      trashcanType,
     );
     const userGetPoint = UserUsageTrialTrash.success * 10;
     const beforePoint = (await this.usersRepository.findByUserId(userId)).point;
@@ -47,7 +62,6 @@ export class TrashService {
       UserUsageTrialTrash.success,
       UserUsageTrialTrash.failure,
     );
-
     return { ...UserUsageTrialTrash, beforePoint };
   }
 

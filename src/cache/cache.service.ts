@@ -159,7 +159,7 @@ export class CacheService {
     userId: number,
     open: Date,
     close: Date,
-    trashcanType:string
+    trashcanType: string,
   ): Promise<OneTrialTrashSummary> {
     const [openString, closeString] = [open, close].map((date) => {
       return format(date, 'yyyy-MM-dd HH:mm:ss.SSS', { locale: ko });
@@ -182,13 +182,13 @@ export class CacheService {
       failure = 0;
     await Promise.all(
       trashLogs.map(({ type: trashType, ok }) => {
-        if (trashcanType != trashType){
-          ok=false;
+        if (trashcanType != trashType) {
+          ok = false;
         }
         const key = `user-trash:${userId}-${openString}`;
         const field = `${trashType}-${ok ? 'success' : 'failure'}`;
         ok ? success++ : failure++;
-        
+
         return this.client.hIncrBy(key, field, 1);
       }),
     );

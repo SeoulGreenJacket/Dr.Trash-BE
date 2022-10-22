@@ -7,6 +7,7 @@ import { CacheModule } from 'src/cache/cache.module';
 import { TrashcansModule } from 'src/trashcans/trashcans.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { AchievementsModule } from 'src/achievements/achievements.module';
+import { KafkaModule } from 'src/kafka/kafka.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { AchievementsModule } from 'src/achievements/achievements.module';
     DatabaseModule,
     UsersModule,
     AchievementsModule,
+    KafkaModule,
   ],
   controllers: [TrashController],
   providers: [TrashService, TrashRepository],

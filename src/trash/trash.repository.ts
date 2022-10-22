@@ -6,6 +6,26 @@ import { Injectable } from '@nestjs/common';
 export class TrashRepository {
   constructor(private databaseService: DatabaseService) {}
 
+  async getLastUsage(userId: number) {
+    const queryResult = await this.databaseService.query<{
+      id: number;
+      code: string;
+      type: string;
+      at: Date;
+    }>(`
+      SELECT
+        *
+      FROM
+        ${database.tables.trashcanUsage}
+      WHERE
+        "userId" = ${userId}
+        AND
+        "close" IS NULL
+    ;`);
+
+    return queryResult.length === 1 ? queryResult[0] : null;
+  }
+
   async createTrashcanUsage(
     userId: number,
     trashcanId: number,

@@ -13,7 +13,6 @@ import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { Trashcan } from 'src/trashcans/entities/trashcan.entity';
-import { TrashcanByIdPipe } from 'src/trashcans/pipe/trashcan-by-id.pipe';
 import { TrashSummary } from './dto/trash-summary.dto';
 import { UserEndTrashRes } from './dto/user-end-trash-response.dto';
 import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
