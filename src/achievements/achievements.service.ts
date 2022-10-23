@@ -83,16 +83,28 @@ export class AchievementsService {
   async checkTrashAchievements(userId: number) {
     const { point } = await this.usersService.findOne(userId);
     const rank = await this.usersService.findRank(userId);
-    const trashCounts = await this.trashService.getTrashLog(userId);
+    const trashTrails = await this.trashService.getTrashTrails(userId);
+    const trashCounts = trashTrails.reduce(
+      (acc, { type, success, failure }) => {
+        acc[type].success += success;
+        acc[type].failure += failure;
+        return acc;
+      },
+      {
+        plastic: { success: 0, failure: 0 },
+        pet: { success: 0, failure: 0 },
+        can: { success: 0, failure: 0 },
+      },
+    );
     const trashTotalCount = {
       success:
-        trashCounts.can.success +
+        trashCounts.plastic.success +
         trashCounts.pet.success +
-        trashCounts.plastic.success,
+        trashCounts.can.success,
       failure:
-        trashCounts.can.failure +
+        trashCounts.plastic.failure +
         trashCounts.pet.failure +
-        trashCounts.plastic.failure,
+        trashCounts.can.failure,
     };
     const ids = await this.achievementsRepository.getAchievableIds(userId);
     await Promise.all([

@@ -1,21 +1,17 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common';
-import { TrashLog } from './dto/trash-log.dto';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { TrashRepository } from './trash.repository';
 import { TrashcansRepository } from 'src/trashcans/trashcans.repository';
 import { KafkaService } from 'src/kafka/kafka.service';
 import { setTimeout } from 'timers/promises';
-import { UsersRepository } from 'src/users/users.repository';
+import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 
 @Injectable()
 export class TrashService {
   constructor(
-    private readonly usersRepository: UsersRepository,
     private readonly trashRepository: TrashRepository,
     private readonly trashcansRepository: TrashcansRepository,
     private readonly kafkaService: KafkaService,
   ) {}
-
-  private logger = new Logger(TrashService.name);
 
   async beginTrashcanUsage(
     userId: number,
@@ -42,38 +38,48 @@ export class TrashService {
     await setTimeout(5000, 'All done');
 
     await this.trashRepository.closeTrashcan(usage.id);
-    return { date: usage.beginAt, type: trashcan.type };
+    return { date: usage.beginAt };
   }
 
-  async getTrashLog(
+  async getTrashTrails(
     userId: number,
     from: Date = new Date(0),
     to: Date = new Date(),
-  ) {
-    const trashCount = await this.trashRepository.countTrash(userId, from, to);
-    const trashLog: TrashLog = {
-      can: {
-        success: 0,
-        failure: 0,
-      },
-      pet: {
-        success: 0,
-        failure: 0,
-      },
-      plastic: {
-        success: 0,
-        failure: 0,
-      },
-    };
+  ): Promise<OneTrialTrashSummary[]> {
+    const usages = await this.trashRepository.findUsages(userId, from, to);
+    const trails: OneTrialTrashSummary[] = [];
 
-    trashCount.forEach((count) => {
-      if (count.trashType === count.trashcanType) {
-        trashLog[count.trashcanType].success += count.count;
-      } else {
-        trashLog[count.trashcanType].failure += count.count;
-      }
-    });
+    await Promise.all(
+      usages.map(async (usage) => {
+        if (usage.endAt === null) {
+          return;
+        }
 
-    return trashLog;
+        const log = await this.trashRepository.countTrash(
+          userId,
+          usage.beginAt,
+          usage.endAt,
+        );
+        const trashcan = await this.trashcansRepository.findById(
+          usage.trashcanId,
+        );
+
+        const trail = new OneTrialTrashSummary();
+        trail.date = usage.beginAt;
+        trail.type = trashcan.type;
+        trail.success = 0;
+        trail.failure = 0;
+        log.forEach((count) => {
+          if (count.trashType === count.trashcanType) {
+            trail.success += count.count;
+          } else {
+            trail.failure += count.count;
+          }
+        });
+        trails.push(trail);
+      }),
+    );
+
+    return trails;
   }
 }
