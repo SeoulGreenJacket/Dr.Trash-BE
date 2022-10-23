@@ -16,11 +16,11 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { User } from 'src/users/entities/user.entity';
-import { CheckUserIdGuard } from 'src/users/guard/check-user-id.guard';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto } from './dto/create-article.dto';
 import { UpdateArticleDto } from './dto/update-article.dto';
 import { Order } from './enum/order.enum';
+import { CheckArticleIdGuard } from './guard/check-article-id.guard';
 
 @ApiBearerAuth()
 @ApiTags('Article')
@@ -51,7 +51,7 @@ export class ArticlesController {
     return this.articlesService.findOne(id);
   }
 
-  @UseGuards(CheckUserIdGuard)
+  @UseGuards(CheckArticleIdGuard)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -60,7 +60,7 @@ export class ArticlesController {
     return this.articlesService.update(id, updateArticleDto);
   }
 
-  @UseGuards(CheckUserIdGuard)
+  @UseGuards(CheckArticleIdGuard)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.remove(id);
