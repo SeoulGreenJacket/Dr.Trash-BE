@@ -69,12 +69,52 @@ export class TrashRepository {
     return queryResult;
   }
 
+  async findUsages(userId: number, from: Date, to: Date) {
+    const queryResult = await this.databaseService.query<{
+      id: number;
+      userId: number;
+      trashcanId: number;
+      beginAt: Date;
+      endAt: Date;
+    }>(`
+      SELECT
+        *
+      FROM
+        ${database.tables.trashcanUsage}
+      WHERE
+        "userId" = ${userId}
+        AND
+        "beginAt" BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
+    ;`);
+
+    return queryResult;
+  }
+
+  async findOneUsage(id: number) {
+    const queryResult = await this.databaseService.query<{
+      id: number;
+      userId: number;
+      trashcanId: number;
+      beginAt: Date;
+      endAt: Date;
+    }>(`
+      SELECT
+        *
+      FROM
+        ${database.tables.trashcanUsage}
+      WHERE
+        "id" = ${id}
+    ;`);
+
+    return queryResult.length === 1 ? queryResult[0] : null;
+  }
+
   async countTrash(userId: number, from: Date, to: Date) {
     const { trash, trashcan, trashcanUsage } = database.tables;
     const queryResult = await this.databaseService.query<{
       trashType: string;
       trashcanType: string;
-      count: number;
+      count: string;
     }>(`
     SELECT
       ${trash}.type AS "trashType",
@@ -93,13 +133,15 @@ export class TrashRepository {
     WHERE
       ${trash}.at BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
       AND
-      ${trash}.type = ${trashcan}.type
-      AND
       ${trashcanUsage}."userId" = ${userId}
     GROUP BY
       ${trash}.type,
       ${trashcan}.type
     `);
-    return queryResult;
+    return queryResult.map((row) => ({
+      trashType: row.trashType,
+      trashcanType: row.trashcanType,
+      count: +row.count,
+    }));
   }
 }

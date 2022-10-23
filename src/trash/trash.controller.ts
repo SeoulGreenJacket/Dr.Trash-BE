@@ -2,7 +2,6 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
-  Logger,
   Param,
   Post,
   Query,
@@ -31,8 +30,6 @@ export class TrashController {
     private readonly usersService: UsersService,
   ) {}
 
-  private readonly logger = new Logger(TrashController.name);
-
   @Post('begin/:code')
   @ApiOkResponse({
     description: 'Begin trashcan usage',
@@ -52,19 +49,19 @@ export class TrashController {
   })
   async end(@AccessUser() user): Promise<UserEndTrashRes> {
     const beforePoint = user.point;
-    const { date, type } = await this.trashService.endTrashcanUsage(user.id);
-    const log = await this.trashService.getTrashLog(user.id, date);
-    await this.usersService.update(user.id, {
-      point: beforePoint + log[type].success * 10,
-    });
+    const { date } = await this.trashService.endTrashcanUsage(user.id);
+    const [trail] = await this.trashService.getTrashTrails(user.id, date);
 
+    await this.usersService.update(user.id, {
+      point: user.point + trail.success * 10,
+    });
     await this.achievementsService.checkTrashAchievements(user.id);
     return {
       beforePoint,
-      date,
-      type,
-      success: log[type].success,
-      failure: log[type].failure,
+      date: trail.date,
+      type: trail.type,
+      success: trail.success,
+      failure: trail.failure,
     };
   }
 
@@ -81,6 +78,6 @@ export class TrashController {
   ) {
     const fromDate = new Date(from);
     const toDate = new Date(to);
-    return await this.trashService.getTrashLog(user.id, fromDate, toDate);
+    return await this.trashService.getTrashTrails(user.id, fromDate, toDate);
   }
 }
