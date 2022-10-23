@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
 import { TrashLog } from './dto/trash-log.dto';
 import { TrashRepository } from './trash.repository';
 import { TrashcansRepository } from 'src/trashcans/trashcans.repository';
@@ -14,6 +14,8 @@ export class TrashService {
     private readonly trashcansRepository: TrashcansRepository,
     private readonly kafkaService: KafkaService,
   ) {}
+
+  private logger = new Logger(TrashService.name);
 
   async beginTrashcanUsage(
     userId: number,

@@ -43,14 +43,12 @@ export class TrashRepository {
         ${database.tables.trashcanUsage}
         (
           "userId",
-          "trashcanId",
-          "open"
+          "trashcanId"
         )
       VALUES
         (
           ${userId},
-          ${trashcanId},
-          now()
+          ${trashcanId}
         )
       RETURNING
         id
