@@ -1,5 +1,5 @@
 import { DatabaseModule } from 'src/database/database.module';
-import { ArticlesRepository } from './articlesRepository';
+import { ArticlesRepository } from './articles.repository';
 import { Module } from '@nestjs/common';
 import { ArticlesService } from './articles.service';
 import { ArticlesController } from './articles.controller';
