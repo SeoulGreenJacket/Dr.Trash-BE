@@ -1,7 +1,15 @@
 import { JwtPayload } from './types/jwt-token-payload.type';
 import { User } from 'src/users/entities/user.entity';
 import { JwtTokenResponseDto } from './dto/jwt-token-response.dto';
-import { Controller, Delete, Get, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  ParseIntPipe,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { KakaoAuthGuard } from './guard/kakao-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -12,6 +20,11 @@ import { RefreshUser } from './decorator/refresh-user.decorator';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  @Get('login/test')
+  async testLogin(@Query('id', ParseIntPipe) id: number) {
+    return await this.authService.login(id);
+  }
 
   @UseGuards(KakaoAuthGuard)
   @Get('login/kakao')

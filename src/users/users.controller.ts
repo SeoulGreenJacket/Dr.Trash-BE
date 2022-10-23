@@ -43,8 +43,8 @@ export class UsersController {
   @ApiBearerAuth()
   @Get('rank')
   async findRankAll(
-    @Query('limit', ParseIntPipe, new DefaultValuePipe(10)) limit: number,
-    @Query('offset', ParseIntPipe, new DefaultValuePipe(0)) offset: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
   ): Promise<UserRankResponseDto[]> {
     return await this.usersService.findRankAll(limit, offset);
   }

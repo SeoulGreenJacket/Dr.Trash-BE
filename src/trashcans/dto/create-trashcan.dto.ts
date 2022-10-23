@@ -5,6 +5,7 @@ import {
   IsMobilePhone,
   IsLatitude,
   IsLongitude,
+  IsEnum,
 } from 'class-validator';
 
 export class CreateTrashcanDto {
@@ -14,6 +15,9 @@ export class CreateTrashcanDto {
   @MinLength(1)
   @MaxLength(32)
   name: string;
+
+  @IsEnum(['can', 'pet', 'plastic'])
+  type: string;
 
   @IsMobilePhone('ko-KR')
   phone: string;
