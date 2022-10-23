@@ -32,9 +32,7 @@ export class UserResponseDto {
 
   @IsNotEmpty()
   @ValidateNested({ each: true })
-  @Type(() => {
-    return UserAchievement;
-  })
+  @Type(() => UserAchievement)
   achievement: UserAchievement[];
 
   @IsNotEmpty()

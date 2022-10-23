@@ -14,13 +14,9 @@ import { jwt } from 'src/common/environments';
 
 @Module({
   imports: [
-    forwardRef(() => {
-      return UsersModule;
-    }),
+    forwardRef(() => UsersModule),
     JwtModule.registerAsync({
-      useFactory: async () => {
-        return jwt.accessConfig;
-      },
+      useFactory: async () => jwt.accessConfig,
     }),
     PassportModule,
     DatabaseModule,

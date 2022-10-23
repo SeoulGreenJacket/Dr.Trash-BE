@@ -18,26 +18,87 @@ export class UsersRepository {
     return result.length === 1 ? result[0] : null;
   }
 
-  async findByKakaoId(kakaoId: bigint) {
+  async findOne(where: {
+    [key: string]: string | number | bigint;
+  }): Promise<User> {
     const result = await this.databaseService.query<User>(`
-      SELECT * FROM ${database.tables.user} WHERE "kakaoId" = ${kakaoId};
+      SELECT
+        *
+      FROM
+        ${database.tables.user}
+      WHERE
+        ${Object.keys(where)
+          .map((key) => `${key}='${where[key]}'`)
+          .join(' AND ')}
     `);
     return result.length === 1 ? result[0] : null;
   }
 
-  async findByUserId(userId: number): Promise<User> {
-    const result = await this.databaseService.query<User>(
-      `SELECT * FROM ${database.tables.user} WHERE id=${userId};`,
-    );
-    return result.length === 1 ? result[0] : null;
+  async findAll(
+    orderBy: 'point' | 'id',
+    order: 'ASC' | 'DESC',
+    limit: number,
+    offset: number,
+  ): Promise<User[]> {
+    const result = await this.databaseService.query<User>(`
+      SELECT
+        *
+      FROM
+        ${database.tables.user}
+        ORDER BY ${orderBy} ${order};
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `);
+    return result;
   }
 
-  async update(name: string, thumbnail: string, id: number): Promise<User> {
-    const result = await this.databaseService.query<User>(
-      `UPDATE ${database.tables.user} SET name='${name}', thumbnail='${thumbnail}' 
-        WHERE id=${id} 
-        RETURNING *;`,
-    );
+  async findRank(userId: number): Promise<number> {
+    const queryResult = await this.databaseService.query<{ rank: number }>(`
+        SELECT
+          rank
+        FROM (
+          SELECT
+            *,
+            RANK() OVER (ORDER BY point DESC) AS rank
+          FROM
+            ${database.tables.user}
+        ) AS rank_table
+        WHERE
+          ${database.tables.user}.id = ${userId}
+    `);
+    return queryResult.length === 1 ? queryResult[0].rank : null;
+  }
+
+  async findRankAll(limit: number, offset: number): Promise<User[]> {
+    const result = await this.databaseService.query<User>(`
+      SELECT
+        *,
+        RANK() OVER (ORDER BY point DESC) AS rank
+      FROM
+        ${database.tables.user}
+      LIMIT ${limit}
+      OFFSET ${offset}
+    `);
+    return result;
+  }
+
+  async update(
+    id: number,
+    values: {
+      [key: string]: string | number | bigint;
+    },
+  ): Promise<User> {
+    const result = await this.databaseService.query<User>(`
+      UPDATE
+        ${database.tables.user}
+      SET
+        ${Object.keys(values)
+          .map((key) => `"${key}"='${values[key]}'`)
+          .join(', ')}
+      WHERE
+        id=${id}
+      RETURNING *
+    `);
     return result.length === 1 ? result[0] : null;
   }
 

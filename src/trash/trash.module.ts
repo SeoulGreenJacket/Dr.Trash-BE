@@ -1,22 +1,23 @@
 import { UsersModule } from 'src/users/users.module';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TrashController } from './trash.controller';
 import { TrashRepository } from './trash.repository';
 import { TrashService } from './trash.service';
-import { CacheModule } from 'src/cache/cache.module';
 import { TrashcansModule } from 'src/trashcans/trashcans.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { AchievementsModule } from 'src/achievements/achievements.module';
+import { KafkaModule } from 'src/kafka/kafka.module';
 
 @Module({
   imports: [
-    CacheModule,
+    forwardRef(() => UsersModule),
+    forwardRef(() => AchievementsModule),
     TrashcansModule,
     DatabaseModule,
-    UsersModule,
-    AchievementsModule,
+    KafkaModule,
   ],
   controllers: [TrashController],
   providers: [TrashService, TrashRepository],
+  exports: [TrashService],
 })
 export class TrashModule {}

@@ -6,12 +6,7 @@ import { DatabaseModule } from 'src/database/database.module';
 import { AchievementsModule } from 'src/achievements/achievements.module';
 
 @Module({
-  imports: [
-    forwardRef(() => {
-      return AchievementsModule;
-    }),
-    DatabaseModule,
-  ],
+  imports: [forwardRef(() => AchievementsModule), DatabaseModule],
   controllers: [TrashcansController],
   providers: [TrashcansService, TrashcansRepository],
   exports: [TrashcansService, TrashcansRepository],

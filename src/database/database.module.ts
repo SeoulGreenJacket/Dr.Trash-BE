@@ -9,9 +9,7 @@ import { DatabaseService } from './database.service';
     DatabaseService,
     {
       provide: 'DATABASE_POOL',
-      useFactory: () => {
-        return new Pool(database.config);
-      },
+      useFactory: () => new Pool(database.config),
     },
   ],
   exports: [DatabaseService],

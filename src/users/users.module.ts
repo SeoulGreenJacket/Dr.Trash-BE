@@ -1,5 +1,4 @@
 import { AchievementsModule } from 'src/achievements/achievements.module';
-import { CacheModule } from './../cache/cache.module';
 import { forwardRef, Module } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
@@ -9,12 +8,9 @@ import { UsersRepository } from './users.repository';
 
 @Module({
   imports: [
-    forwardRef(() => {
-      return AuthModule;
-    }),
+    forwardRef(() => AuthModule),
+    forwardRef(() => AchievementsModule),
     DatabaseModule,
-    CacheModule,
-    AchievementsModule,
   ],
   controllers: [UsersController],
   providers: [UsersService, UsersRepository],
