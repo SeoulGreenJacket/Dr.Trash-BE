@@ -15,6 +15,7 @@ export const database = {
     achiever: `"${process.env.DATABASE_SCHEMA}"."achiever"`,
     trashcanUsage: `"${process.env.DATABASE_SCHEMA}"."trashcanUsage"`,
     trashcanCode: `"${process.env.DATABASE_SCHEMA}"."trashcanCode"`,
+    article: `"${process.env.DATABASE_SCHEMA}"."article"`,
   },
 };
 

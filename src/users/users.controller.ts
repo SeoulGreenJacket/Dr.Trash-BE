@@ -22,25 +22,23 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @ApiTags('User')
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @ApiBearerAuth()
   @Get()
   async findMe(@AccessUser() user: User): Promise<any> {
     return user.id;
   }
 
-  @ApiBearerAuth()
   @Get('count')
   async countUserTrashTrial(@AccessUser() user: User): Promise<number> {
     return await this.usersService.countUserTrashTrial(user.id);
   }
 
-  @ApiBearerAuth()
   @Get('rank')
   async findRankAll(
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -49,7 +47,6 @@ export class UsersController {
     return await this.usersService.findRankAll(limit, offset);
   }
 
-  @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
   @Get(':id')
   async findOne(
@@ -66,7 +63,6 @@ export class UsersController {
       transform: true,
     }),
   )
-  @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
   @Patch(':id')
   async update(
@@ -79,7 +75,6 @@ export class UsersController {
     });
   }
 
-  @ApiBearerAuth()
   @UseGuards(CheckUserIdGuard)
   @Delete(':id')
   async delete(@Param('id', ParseIntPipe) id: number): Promise<number> {

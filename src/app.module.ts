@@ -8,6 +8,7 @@ import { TrashModule } from './trash/trash.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AchievementInterceptor } from './achievements/achievement.interceptor';
+import { ArticlesModule } from './articles/articles.module';
 import { KafkaModule } from './kafka/kafka.module';
 
 @Module({
@@ -18,10 +19,11 @@ import { KafkaModule } from './kafka/kafka.module';
     AchievementsModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.development.env',
+      envFilePath: '.env',
     }),
     TrashcansModule,
     TrashModule,
+    ArticlesModule,
     KafkaModule,
   ],
   providers: [
