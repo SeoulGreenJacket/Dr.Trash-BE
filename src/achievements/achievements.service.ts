@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { CacheService } from 'src/cache/cache.service';
+import { TrashService } from 'src/trash/trash.service';
 import { TrashcansService } from 'src/trashcans/trashcans.service';
+import { UsersService } from 'src/users/users.service';
 import { AchievementsRepository } from './achievements.repository';
 
 @Injectable()
@@ -16,11 +17,6 @@ export class AchievementsService {
     { id: 0, criterion: 10000 },
   ];
   private readonly canAchievements = [
-    { id: 0, criterion: 100 },
-    { id: 0, criterion: 1000 },
-    { id: 0, criterion: 10000 },
-  ];
-  private readonly paperAchievements = [
     { id: 0, criterion: 100 },
     { id: 0, criterion: 1000 },
     { id: 0, criterion: 10000 },
@@ -47,32 +43,46 @@ export class AchievementsService {
   ];
 
   constructor(
-    private readonly cacheService: CacheService,
+    private readonly trashService: TrashService,
     private readonly trashcansService: TrashcansService,
+    private readonly usersService: UsersService,
+
     private readonly achievementsRepository: AchievementsRepository,
   ) {}
+
+  private notifications = {};
+
+  async updateNotification(userId: number, achvId: number) {
+    if (this.notifications[userId] === undefined) {
+      this.notifications[userId] = [];
+    }
+    this.notifications[userId].push(achvId);
+  }
+
+  async getNotifications(userId: number) {
+    const achvs = this.notifications[userId];
+    return achvs.map((id) => this.achievementsRepository.getAchievement(id));
+  }
 
   async unlockAchievement(id: number, userId: number) {
     await Promise.all([
       this.achievementsRepository.unlock(userId, id),
-      this.cacheService.updateAchievementNotification(userId, id),
+      this.updateNotification(userId, id),
     ]);
   }
 
   async checkTrashAchievements(userId: number) {
-    const point = await this.cacheService.getUserPoint(userId);
-    const rank = await this.cacheService.getUserRank(userId);
-    const trashCounts = await this.cacheService.getUserTrashAllSummary(userId);
+    const { point } = await this.usersService.findOne(userId);
+    const rank = await this.usersService.findRank(userId);
+    const trashCounts = await this.trashService.getTrashLog(userId);
     const trashTotalCount = {
       success:
         trashCounts.can.success +
         trashCounts.pet.success +
-        trashCounts.paper.success +
         trashCounts.plastic.success,
       failure:
         trashCounts.can.failure +
         trashCounts.pet.failure +
-        trashCounts.paper.failure +
         trashCounts.plastic.failure,
     };
     const ids = await this.achievementsRepository.getAchievableIds(userId);
@@ -92,11 +102,6 @@ export class AchievementsService {
       }),
       ...this.canAchievements.map(({ id, criterion }) => {
         if (ids.includes(id) && trashCounts.can.success >= criterion) {
-          return this.unlockAchievement(id, userId);
-        }
-      }),
-      ...this.paperAchievements.map(({ id, criterion }) => {
-        if (ids.includes(id) && trashCounts.paper.success >= criterion) {
           return this.unlockAchievement(id, userId);
         }
       }),

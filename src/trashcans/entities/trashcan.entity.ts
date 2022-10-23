@@ -7,7 +7,9 @@ import {
   IsLatitude,
   IsLongitude,
   IsDate,
+  IsEnum,
 } from 'class-validator';
+import { TrashLog } from 'src/trash/dto/trash-log.dto';
 
 export class Trashcan {
   @IsInt()
@@ -22,6 +24,9 @@ export class Trashcan {
   @MinLength(1)
   @MaxLength(32)
   name: string;
+
+  @IsEnum(Object.keys(TrashLog))
+  type: string;
 
   @IsMobilePhone('ko-KR')
   phoneNumber: string;

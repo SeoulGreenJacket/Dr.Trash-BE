@@ -72,9 +72,11 @@ export class UsersController {
   async update(
     @Param('id') id: number,
     @Body() userUpdateDto: UserUpdateDto,
-    @AccessUser() user: User,
   ): Promise<any> {
-    return await this.usersService.update(userUpdateDto, user);
+    return await this.usersService.update(id, {
+      name: userUpdateDto.name,
+      thumbnail: userUpdateDto.thumbnail,
+    });
   }
 
   @ApiBearerAuth()

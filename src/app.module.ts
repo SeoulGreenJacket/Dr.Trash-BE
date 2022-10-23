@@ -3,7 +3,6 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
-import { CacheModule } from './cache/cache.module';
 import { TrashcansModule } from './trashcans/trashcans.module';
 import { TrashModule } from './trash/trash.module';
 import { AchievementsModule } from './achievements/achievements.module';
@@ -14,7 +13,6 @@ import { KafkaModule } from './kafka/kafka.module';
 @Module({
   imports: [
     AuthModule,
-    CacheModule,
     DatabaseModule,
     UsersModule,
     AchievementsModule,

@@ -28,7 +28,9 @@ export class KakaoStrategy extends PassportStrategy(Strategy) {
     const name = profileJson.kakao_account.profile.nickname;
     const thumbnail = profileJson.kakao_account.profile.thumbnail_image_url;
 
-    let existedUser: User = await this.usersRepository.findByKakaoId(kakaoId);
+    let existedUser: User = await this.usersRepository.findOne({
+      kakaoId: kakaoId,
+    });
     if (!existedUser) {
       existedUser = await this.usersService.create(kakaoId, thumbnail, name);
     }

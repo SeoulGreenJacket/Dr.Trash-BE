@@ -117,9 +117,7 @@ export class AchievementsRepository {
     const result = await this.databaseService.query<{ id: string }>(query, [
       userId,
     ]);
-    return result.map((row) => {
-      return parseInt(row.id);
-    });
+    return result.map((row) => parseInt(row.id));
   }
 
   async isAchieved(userId: number, achievementId: number): Promise<boolean> {
