@@ -2,6 +2,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  Logger,
   Param,
   Post,
   Query,
@@ -29,6 +30,8 @@ export class TrashController {
     private readonly achievementsService: AchievementsService,
     private readonly usersService: UsersService,
   ) {}
+
+  private readonly logger = new Logger(TrashController.name);
 
   @Post('begin/:code')
   @ApiOkResponse({

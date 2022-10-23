@@ -61,7 +61,16 @@ export class AchievementsService {
 
   async getNotifications(userId: number) {
     const achvs = this.notifications[userId];
-    return achvs.map((id) => this.achievementsRepository.getAchievement(id));
+    if (achvs === undefined) {
+      return [];
+    }
+
+    const achievements = await Promise.all(
+      achvs.map(async (id: number) =>
+        this.achievementsRepository.getAchievement(id),
+      ),
+    );
+    return achievements;
   }
 
   async unlockAchievement(id: number, userId: number) {

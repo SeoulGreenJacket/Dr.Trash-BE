@@ -30,6 +30,7 @@ export class TrashcansRepository {
           "managerId",
           "code",
           "name",
+          "type",
           "phoneNumber",
           "latitude",
           "longitude"
@@ -61,6 +62,7 @@ export class TrashcansRepository {
         "managerId",
         "code",
         "name",
+        "type",
         "phoneNumber",
         "latitude",
         "longitude"
@@ -83,6 +85,7 @@ export class TrashcansRepository {
         "managerId",
         "code",
         "name",
+        "type",
         "phoneNumber",
         "latitude",
         "longitude"
@@ -102,6 +105,7 @@ export class TrashcansRepository {
         "managerId",
         "code",
         "name",
+        "type",
         "phoneNumber",
         "latitude",
         "longitude"
@@ -121,6 +125,7 @@ export class TrashcansRepository {
         "managerId",
         "code",
         "name",
+        "type",
         "phoneNumber",
         "latitude",
         "longitude"

@@ -58,13 +58,13 @@ export class UsersRepository {
           rank
         FROM (
           SELECT
-            *,
+            id,
             RANK() OVER (ORDER BY point DESC) AS rank
           FROM
             ${database.tables.user}
         ) AS rank_table
         WHERE
-          ${database.tables.user}.id = ${userId}
+          rank_table.id = ${userId}
     `);
     return queryResult.length === 1 ? queryResult[0].rank : null;
   }
