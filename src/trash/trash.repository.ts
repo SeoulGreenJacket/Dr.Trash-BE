@@ -37,18 +37,21 @@ export class TrashRepository {
   async createTrashcanUsage(
     userId: number,
     trashcanId: number,
+    point: number,
   ): Promise<number> {
     const queryResult = await this.databaseService.query<{ id: number }>(`
       INSERT INTO
         ${database.tables.trashcanUsage}
         (
           "userId",
-          "trashcanId"
+          "trashcanId",
+          "beforePoint"
         )
       VALUES
         (
           ${userId},
-          ${trashcanId}
+          ${trashcanId},
+          ${point}
         )
       RETURNING
         id

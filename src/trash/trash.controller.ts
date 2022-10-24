@@ -40,7 +40,11 @@ export class TrashController {
     @AccessUser() user,
     @Param('code', TrashcanByCodePipe) trashcan: Trashcan,
   ): Promise<number> {
-    return await this.trashService.beginTrashcanUsage(user.id, trashcan.id);
+    return await this.trashService.beginTrashcanUsage(
+      user.id,
+      trashcan.id,
+      user.point,
+    );
   }
 
   @Post('end')

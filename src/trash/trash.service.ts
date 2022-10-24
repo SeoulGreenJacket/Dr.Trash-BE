@@ -16,10 +16,12 @@ export class TrashService {
   async beginTrashcanUsage(
     userId: number,
     trashcanId: number,
+    userPoint: number,
   ): Promise<number> {
     const usageId = await this.trashRepository.createTrashcanUsage(
       userId,
       trashcanId,
+      userPoint,
     );
     this.kafkaService.send(trashcanId.toString(), 'start');
     return usageId;
