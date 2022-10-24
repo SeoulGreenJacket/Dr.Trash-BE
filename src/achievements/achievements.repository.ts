@@ -142,9 +142,9 @@ export class AchievementsRepository {
     const query = `
       INSERT INTO
         ${database.tables.achiever}
-        ("userId", "achievementId", "achievedAt")
+        ("userId", "achievementId")
       VALUES
-        ($1, $2, NOW())
+        ($1, $2)
     `;
     await this.databaseService.query(query, [userId, achievementId]);
   }
