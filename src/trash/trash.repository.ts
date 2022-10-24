@@ -74,6 +74,7 @@ export class TrashRepository {
       id: number;
       userId: number;
       trashcanId: number;
+      beforePoint: number;
       beginAt: Date;
       endAt: Date;
     }>(`
@@ -87,7 +88,16 @@ export class TrashRepository {
         "beginAt" BETWEEN '${from.toISOString()}' AND '${to.toISOString()}'
     ;`);
 
-    return queryResult;
+    return queryResult.map((row) => {
+      const { id, userId, trashcanId, beforePoint, ...datas } = row;
+      return {
+        id: +id,
+        userId: +userId,
+        trashcanId: +trashcanId,
+        beforePoint: +beforePoint,
+        ...datas,
+      };
+    });
   }
 
   async findOneUsage(id: number) {

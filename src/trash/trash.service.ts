@@ -65,6 +65,7 @@ export class TrashService {
         );
 
         const trail = new OneTrialTrashSummary();
+        trail.beforePoint = usage.beforePoint;
         trail.date = usage.beginAt;
         trail.type = trashcan.type;
         trail.success = 0;
