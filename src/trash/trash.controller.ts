@@ -18,6 +18,7 @@ import { AchievementsService } from 'src/achievements/achievements.service';
 import { TrashcanByCodePipe } from 'src/trashcans/pipe/trashcan-by-code.pipe';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { OneTrialTrashSummary } from './dto/one-trial-trash-summary.dto';
 
 @ApiTags('Trash')
 @Controller('trash')
@@ -68,7 +69,7 @@ export class TrashController {
   @Get('log')
   @ApiOkResponse({
     description: 'Get user trash log',
-    type: TrashLog,
+    type: [OneTrialTrashSummary],
   })
   async getTrashLog(
     @AccessUser() user: User,
@@ -79,5 +80,27 @@ export class TrashController {
     const fromDate = new Date(from);
     const toDate = new Date(to);
     return await this.trashService.getTrashTrails(user.id, fromDate, toDate);
+  }
+
+  @Get('summary')
+  @ApiOkResponse({
+    description: 'Get user trash summary',
+    type: TrashLog,
+  })
+  async getTrashSummary(@AccessUser() user: User) {
+    const logs = await this.trashService.getTrashTrails(user.id);
+    const summary = logs.reduce(
+      (acc, cur) => {
+        acc[cur.type].success += cur.success;
+        acc[cur.type].failure += cur.failure;
+        return acc;
+      },
+      {
+        can: { success: 0, failure: 0 },
+        pet: { success: 0, failure: 0 },
+        plastic: { success: 0, failure: 0 },
+      },
+    );
+    return summary;
   }
 }

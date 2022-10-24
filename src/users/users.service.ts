@@ -3,7 +3,6 @@ import { User } from 'src/users/entities/user.entity';
 import { UsersRepository } from './users.repository';
 import { Injectable } from '@nestjs/common';
 import { UserResponseDto } from './dto/user-response.dto';
-import { UserUpdateDto } from './dto/user-update.dto';
 import { UserRankResponseDto } from './dto/user-rank-response.dto';
 import { Grade } from './types/grade.enum';
 import { UserAchievement } from 'src/achievements/entity/user-achievement.entity';
