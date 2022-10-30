@@ -28,7 +28,7 @@ export class UsersRepository {
         ${database.tables.user}
       WHERE
         ${Object.keys(where)
-          .map((key) => `${key}='${where[key]}'`)
+          .map((key) => `"${key}"='${where[key]}'`)
           .join(' AND ')}
     `);
     return result.length === 1 ? result[0] : null;
