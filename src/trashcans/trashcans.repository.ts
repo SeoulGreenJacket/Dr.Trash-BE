@@ -22,6 +22,19 @@ export class TrashcansRepository {
     return +queryResult[0].count === 1;
   }
 
+  async getCode(id: number): Promise<string> {
+    const queryResult = await this.databaseService.query<{ code: string }>(`
+      SELECT
+        code
+      FROM
+        ${database.tables.trashcan}
+      WHERE
+        id = '${id}'
+    ;`);
+
+    return queryResult.length === 1 ? queryResult[0].code : null;
+  }
+
   async create(userId: number, dto: CreateTrashcanDto): Promise<boolean> {
     const queryResult = await this.databaseService.query<{ id: number }>(`
       INSERT INTO
@@ -40,6 +53,7 @@ export class TrashcansRepository {
           '${userId}',
           '${dto.code}',
           '${dto.name}',
+          '${dto.type}',
           '${dto.phone}',
           '${dto.latitude}',
           '${dto.longitude}'
