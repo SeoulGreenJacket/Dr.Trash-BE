@@ -55,4 +55,7 @@ export const redis = {
 export const kafka = {
   host: process.env.KAFKA_HOST,
   port: parseInt(process.env.KAFKA_PORT),
+  topic: {
+    tracker: process.env.KAFKA_TOPIC_TRACKER,
+  },
 };

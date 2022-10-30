@@ -1,6 +1,17 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { AchievementsRepository } from './achievements.repository';
 
+@ApiTags('Achievements')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('achievements')
 export class AchievementsController {
   constructor(

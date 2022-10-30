@@ -23,7 +23,8 @@ export class TrashService {
       trashcanId,
       userPoint,
     );
-    this.kafkaService.send(trashcanId.toString(), 'start');
+    const trashcanCode = await this.trashcansRepository.getCode(trashcanId);
+    this.kafkaService.send(`${trashcanCode}-control`, `start-${usageId}`);
     return usageId;
   }
 
@@ -33,7 +34,7 @@ export class TrashService {
       throw new ConflictException('Open trashcan first');
     }
     const trashcan = await this.trashcansRepository.findById(usage.trashcanId);
-    this.kafkaService.send(trashcan.code, 'pause');
+    this.kafkaService.send(`${trashcan.code}-control`, 'pause');
 
     // wait for last image to be processed
     // TODO: change to something better

@@ -7,7 +7,12 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AccessUser } from 'src/auth/decorator/access-user.decorator';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { Trashcan } from 'src/trashcans/entities/trashcan.entity';
@@ -32,10 +37,7 @@ export class TrashController {
   ) {}
 
   @Post('begin/:code')
-  @ApiOkResponse({
-    description: 'Begin trashcan usage',
-    type: Boolean,
-  })
+  @ApiCreatedResponse({ description: 'Usage number', type: Number })
   async begin(
     @AccessUser() user,
     @Param('code', TrashcanByCodePipe) trashcan: Trashcan,
@@ -48,9 +50,9 @@ export class TrashController {
   }
 
   @Post('end')
-  @ApiOkResponse({
-    description: 'End trashcan usage',
-    type: Boolean,
+  @ApiCreatedResponse({
+    description: 'Trash summary',
+    type: OneTrialTrashSummary,
   })
   async end(@AccessUser() user): Promise<UserEndTrashRes> {
     const beforePoint = user.point;
