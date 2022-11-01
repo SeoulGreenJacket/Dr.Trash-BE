@@ -41,7 +41,7 @@ export class ArticlesRepository {
 
   async findOne(id: number) {
     const result = await this.databaseService.query<ResponseArticle>(`
-      SELECT "title","content","viewCount","createdAt","updatedAt","name" 
+      SELECT "authorId","title","content","viewCount","createdAt","updatedAt","name" 
       FROM ${database.tables.article} 
       INNER JOIN ${database.tables.user} 
       ON ${database.tables.article}.authorId=${database.tables.user}.id
