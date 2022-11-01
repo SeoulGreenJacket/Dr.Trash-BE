@@ -33,7 +33,7 @@ export class ArticlesRepository {
   async increaseViewCount(id: number) {
     const result = await this.databaseService.query<{ viewCount: number }>(
       `UPDATE ${database.tables.article} SET "viewCount"="viewCount"+1
-        WHERE id=${id} 
+        WHERE id=${id}
         RETURNING "viewCount";`,
     );
     return result.length === 1 ? result[0].viewCount : null;
@@ -44,7 +44,7 @@ export class ArticlesRepository {
       SELECT "title","content","viewCount","createdAt","updatedAt","name" 
       FROM ${database.tables.article} 
       INNER JOIN ${database.tables.user} 
-      ON ${database.tables.article}.authorId=${database.tables.user}.id
+      ON ${database.tables.article}."authorId"=${database.tables.user}.id
       WHERE ${database.tables.article}.id=${id};
     `);
     return result.length === 1 ? result[0] : null;
@@ -61,7 +61,7 @@ export class ArticlesRepository {
     const { title, content } = updateArticleDto;
     const result = await this.databaseService.query<Article>(
       `UPDATE ${database.tables.article} SET title='${title}', content='${content}' , "updatedAt"=NOW()
-        WHERE id=${id} 
+        WHERE id=${id}
         RETURNING *;`,
     );
     return result.length === 1 ? result[0] : null;
