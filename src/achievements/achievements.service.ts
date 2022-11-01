@@ -8,38 +8,38 @@ import { AchievementsRepository } from './achievements.repository';
 export class AchievementsService {
   private readonly trashAchievements = [
     { id: 1, criterion: 1 },
-    { id: 2, criterion: 10 },
-    { id: 3, criterion: 100 },
+    { id: 0, criterion: 10 },
+    { id: 0, criterion: 100 },
   ];
   private readonly plasticAchievements = [
-    { id: 4, criterion: 1 },
-    { id: 5, criterion: 10 },
-    { id: 6, criterion: 100 },
+    { id: 0, criterion: 1 },
+    { id: 0, criterion: 10 },
+    { id: 0, criterion: 100 },
   ];
   private readonly canAchievements = [
-    { id: 7, criterion: 1 },
-    { id: 8, criterion: 10 },
-    { id: 9, criterion: 100 },
+    { id: 0, criterion: 1 },
+    { id: 0, criterion: 10 },
+    { id: 0, criterion: 100 },
   ];
   private readonly petAchievements = [
-    { id: 10, criterion: 1 },
-    { id: 11, criterion: 10 },
-    { id: 12, criterion: 100 },
+    { id: 0, criterion: 1 },
+    { id: 0, criterion: 10 },
+    { id: 0, criterion: 100 },
   ];
   private readonly rankAchievements = [
-    { id: 13, criterion: 3 },
-    { id: 14, criterion: 10 },
-    { id: 15, criterion: 30 },
+    { id: 2, criterion: 3 },
+    { id: 0, criterion: 10 },
+    { id: 0, criterion: 30 },
   ];
   private readonly pointAchievements = [
-    { id: 16, criterion: 100 },
-    { id: 17, criterion: 1000 },
-    { id: 18, criterion: 10000 },
+    { id: 3, criterion: 100 },
+    { id: 0, criterion: 1000 },
+    { id: 0, criterion: 10000 },
   ];
   private readonly trashcanAchievements = [
-    { id: 19, criterion: 5 },
-    { id: 20, criterion: 10 },
-    { id: 21, criterion: 50 },
+    { id: 4, criterion: 1 },
+    { id: 0, criterion: 5 },
+    { id: 0, criterion: 10 },
   ];
 
   constructor(
