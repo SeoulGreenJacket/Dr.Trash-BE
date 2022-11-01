@@ -11,6 +11,7 @@ export class TrashRepository {
       id: number;
       userId: number;
       trashcanId: number;
+      trashcanType: string;
       beginAt: Date;
       endAt: Date;
     }>(`
@@ -18,6 +19,7 @@ export class TrashRepository {
         "id",
         "userId",
         "trashcanId",
+        "trashcanType",
         "beginAt",
         "endAt"
       FROM
@@ -37,6 +39,7 @@ export class TrashRepository {
   async createTrashcanUsage(
     userId: number,
     trashcanId: number,
+    trashcanType: string,
     point: number,
   ): Promise<number> {
     const queryResult = await this.databaseService.query<{ id: number }>(`
@@ -45,12 +48,14 @@ export class TrashRepository {
         (
           "userId",
           "trashcanId",
+          "trashcanType",
           "beforePoint"
         )
       VALUES
         (
           ${userId},
           ${trashcanId},
+           '${trashcanType}',
           ${point}
         )
       RETURNING
@@ -77,6 +82,7 @@ export class TrashRepository {
       id: number;
       userId: number;
       trashcanId: number;
+      trashcanType: string;
       beforePoint: number;
       beginAt: Date;
       endAt: Date;
@@ -108,6 +114,7 @@ export class TrashRepository {
       id: number;
       userId: number;
       trashcanId: number;
+      trashcanType: string;
       beginAt: Date;
       endAt: Date;
     }>(`

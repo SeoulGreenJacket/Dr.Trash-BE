@@ -16,11 +16,13 @@ export class TrashService {
   async beginTrashcanUsage(
     userId: number,
     trashcanId: number,
+    trashcanType: string,
     userPoint: number,
   ): Promise<number> {
     const usageId = await this.trashRepository.createTrashcanUsage(
       userId,
       trashcanId,
+      trashcanType,
       userPoint,
     );
     const trashcanCode = await this.trashcansRepository.getCode(trashcanId);
@@ -63,14 +65,11 @@ export class TrashService {
           usage.beginAt,
           usage.endAt,
         );
-        const trashcan = await this.trashcansRepository.findById(
-          usage.trashcanId,
-        );
 
         const trail = new OneTrialTrashSummary();
         trail.beforePoint = usage.beforePoint;
         trail.date = usage.beginAt;
-        trail.type = trashcan.type;
+        trail.type = usage.trashcanType;
         trail.success = 0;
         trail.failure = 0;
         log.forEach((count) => {

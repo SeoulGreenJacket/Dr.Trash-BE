@@ -1,5 +1,4 @@
 export class ResponseArticle {
-  authorId: number;
   title: string;
   content: string;
   viewCount: number;

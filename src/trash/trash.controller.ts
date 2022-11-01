@@ -45,6 +45,7 @@ export class TrashController {
     return await this.trashService.beginTrashcanUsage(
       user.id,
       trashcan.id,
+      trashcan.type,
       user.point,
     );
   }

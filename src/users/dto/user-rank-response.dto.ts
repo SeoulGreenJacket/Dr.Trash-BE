@@ -11,4 +11,6 @@ export class UserRankResponseDto {
   @IsNotEmpty()
   @IsNumber()
   point: number;
+
+  thumbnail: string;
 }
