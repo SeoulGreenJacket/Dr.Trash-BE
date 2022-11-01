@@ -4,6 +4,7 @@ import { DatabaseService } from 'src/database/database.service';
 import { Article } from './entities/article.entity';
 import { database } from 'src/common/environments';
 import { Order } from './enum/order.enum';
+import { ResponseArticle } from './dto/response-article-dto';
 
 @Injectable()
 export class ArticlesRepository {
@@ -39,8 +40,12 @@ export class ArticlesRepository {
   }
 
   async findOne(id: number) {
-    const result = await this.databaseService.query<Article>(`
-      SELECT * FROM ${database.tables.article} WHERE id=${id};
+    const result = await this.databaseService.query<ResponseArticle>(`
+      SELECT "authorId","title","content","viewCount","createdAt","updatedAt","name" 
+      FROM ${database.tables.article} 
+      INNER JOIN ${database.tables.user} 
+      ON ${database.tables.article}.authorId=${database.tables.user}.id
+      WHERE ${database.tables.article}.id=${id};
     `);
     return result.length === 1 ? result[0] : null;
   }
