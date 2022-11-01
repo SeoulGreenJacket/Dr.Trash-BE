@@ -7,8 +7,9 @@ export class CheckArticleIdGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    const authorId = (await this.articlesRepository.findOne(request.params.id))
-      .authorId;
+    const authorId = await this.articlesRepository.findAuthorIdByid(
+      request.params.id,
+    );
 
     return user.id === authorId;
   }
