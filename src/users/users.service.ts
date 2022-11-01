@@ -62,6 +62,7 @@ export class UsersService {
         userId: user.id,
         userName: user.name,
         point: user.point,
+        thumbnail: user.thumbnail,
       };
     });
   }
